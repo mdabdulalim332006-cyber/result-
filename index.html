@@ -10,7 +10,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot, query, where, orderBy, limit, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyCoVtvBd_vGvEsKO6Gs2vSHtSKnh6fp5S0",
@@ -25,6 +25,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        
+        // ✅ FIX 1: Session Persistence Set করুন
+        setPersistence(auth, browserLocalPersistence)
+            .then(() => {
+                console.log('✅ Auth Persistence: Local (Auto-Login enabled)');
+            })
+            .catch((error) => {
+                console.error('Persistence error:', error);
+            });
         
         window.db = db;
         window.auth = auth;
@@ -44,6 +53,8 @@
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
         window.signOut = signOut;
         window.onAuthStateChanged = onAuthStateChanged;
+        window.setPersistence = setPersistence;
+        window.browserLocalPersistence = browserLocalPersistence;
         
         console.log('✅ Firebase Initialized');
     </script>
@@ -148,6 +159,34 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== VISUAL BACK BUTTON ===== */
+        .visual-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            margin-bottom: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            align-self: flex-start;
+        }
+
+        .visual-back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .visual-back-btn span {
+            font-size: 18px;
+            line-height: 1;
         }
 
         .welcome-section { text-align: center; margin-bottom: 28px; }
@@ -963,7 +1002,6 @@
             color: var(--tg-theme-text-color);
         }
 
-        /* Promotion item in admin */
         .promotion-item {
             background: var(--tg-theme-bg-color);
             border-radius: 8px;
@@ -1079,6 +1117,11 @@
 
             <!-- GUIDELINE PAGE -->
             <section id="guidelinePage" class="page" style="display: none;" role="main">
+                <!-- ✅ FIX 3: Visual Back Button -->
+                <button class="visual-back-btn" onclick="goBack()">
+                    <span>←</span> Back
+                </button>
+                
                 <div class="guideline-header">
                     <span class="guideline-icon">📋</span>
                     <h2>Result দেখার নিয়ম</h2>
@@ -1305,6 +1348,11 @@
         const APP_CONFIG = {
             OFFICIAL_RESULT_URL: 'https://www.educationboardresults.gov.bd/',
             
+            // ✅ FIX 4: Telegram Mini App Share Link
+            // আপনার Bot-এর Username এখানে দিন
+            BOT_USERNAME: 'YourBotUsername', // যেমন: BoardResultGuideBot
+            MINI_APP_SHORT_NAME: 'result', // BotFather-এ /setmenubutton দিয়ে সেট করা short name
+            
             SSC_STUDENT_STEPS: [
                 { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
                 { icon: '🎓', title: 'Examination নির্বাচন করুন', desc: '<strong>SSC/Dakhil/Equivalent</strong> নির্বাচন করুন।' },
@@ -1370,6 +1418,7 @@
                             tg = Telegram.WebApp;
                             isTelegramEnv = true;
                             tg.expand();
+                            tg.ready(); // ✅ FIX: tg.ready() call
                             applyTheme(tg.themeParams || {});
                             tg.onEvent('themeChanged', function() {
                                 applyTheme(tg.themeParams || {});
@@ -1471,6 +1520,12 @@
                 }
             }
 
+            function closeApp() {
+                if (tg && tg.close) {
+                    tg.close();
+                }
+            }
+
             function hapticFeedback(type) {
                 if (!tg || !tg.HapticFeedback) return;
                 try {
@@ -1492,13 +1547,14 @@
                 onBackButton: onBackButton,
                 showAlert: showAlert,
                 openUrl: openUrl,
+                closeApp: closeApp,
                 hapticFeedback: hapticFeedback,
                 applyTheme: applyTheme
             };
         })();
 
         // ====================================================================
-        // GLOBAL STATE (accessible from any function)
+        // GLOBAL STATE
         // ====================================================================
         window.APP_STATE = {
             appSettings: null,
@@ -1506,7 +1562,24 @@
         };
 
         // ====================================================================
-        // GUIDELINE EXTRA FUNCTIONS (FIXED - No error)
+        // ✅ FIX 3: GO BACK FUNCTION
+        // ====================================================================
+        window.goBack = function() {
+            var state = window.APP_STATE;
+            if (state.currentPage === 'guideline') {
+                // Guideline → Home
+                if (window._showHome) {
+                    window._showHome();
+                }
+                TelegramModule.hapticFeedback('light');
+            } else {
+                // Home → Close App (if in Telegram)
+                TelegramModule.closeApp();
+            }
+        };
+
+        // ====================================================================
+        // GUIDELINE EXTRA FUNCTIONS
         // ====================================================================
         function openTelegramGroup() {
             var link = window.APP_STATE.appSettings?.telegramGroup || 'https://t.me/your_group';
@@ -1532,14 +1605,14 @@
             
             TelegramModule.showAlert(
                 '💬 Feedback\n\n' +
-                'আপনার মতবামত জানান:\n' +
+                'আপনার মতামত জানান:\n' +
                 '📧 ' + feedbackEmail + '\n' +
                 '📢 ' + feedbackLink
             );
         }
 
         // ====================================================================
-        // PROMOTIONS MANAGEMENT (Multiple)
+        // PROMOTIONS MANAGEMENT
         // ====================================================================
         function addPromotion() {
             const container = document.getElementById('promotionsAdminContainer');
@@ -1701,7 +1774,6 @@
                 resultHelpSection: document.getElementById('resultHelpSection'),
                 helpText: document.getElementById('helpText'),
                 helpLink: document.getElementById('helpLink'),
-                // Admin
                 adminLoginOverlay: document.getElementById('adminLoginOverlay'),
                 adminPanelContainer: document.getElementById('adminPanelContainer'),
                 adminEmail: document.getElementById('adminEmail'),
@@ -1748,6 +1820,7 @@
                         setupEventListeners();
                         setupNetworkListeners();
                         setupAdminLoginTrigger();
+                        setupAuthListener(); // ✅ FIX 1: Auto-Login Listener
                     }
                     
                     await loadSettings();
@@ -1773,7 +1846,35 @@
             }
             
             // ============================================================
-            // SETUP ADMIN LOGIN TRIGGER (5 clicks on app name)
+            // ✅ FIX 1: AUTH LISTENER FOR AUTO-LOGIN
+            // ============================================================
+            function setupAuthListener() {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        try {
+                            // Check if user is admin
+                            const q = query(collection(db, 'admins'), where('email', '==', user.email));
+                            const snap = await getDocs(q);
+                            
+                            if (!snap.empty) {
+                                state.isAdmin = true;
+                                console.log('✅ Admin auto-logged in:', user.email);
+                            } else {
+                                state.isAdmin = false;
+                                await signOut(auth);
+                            }
+                        } catch (error) {
+                            console.error('Auth check error:', error);
+                        }
+                    } else {
+                        state.isAdmin = false;
+                        console.log('❌ No admin session');
+                    }
+                });
+            }
+            
+            // ============================================================
+            // SETUP ADMIN LOGIN TRIGGER
             // ============================================================
             function setupAdminLoginTrigger() {
                 const titleEl = DOM.appTitle;
@@ -1873,19 +1974,19 @@
                     }
                 }
                 
-                // ===== PROMOTIONS (Multiple) =====
+                // Promotions
                 if (DOM.promotionsContainer) {
                     DOM.promotionsContainer.innerHTML = '';
                     const promotions = data.promotions || [];
                     const enabledPromos = promotions.filter(p => p.enabled !== false && p.link);
                     
-                    enabledPromos.forEach((promo, index) => {
+                    enabledPromos.forEach((promo) => {
                         const promoEl = document.createElement('div');
                         promoEl.className = 'promotion-card active';
                         promoEl.innerHTML = `
                             <h4>${promo.icon || '📢'} ${promo.title || ''}</h4>
                             <p>${promo.text || ''}</p>
-                            <button class="promo-btn" data-link="${promo.link}">${promo.buttonText || '🔗 দেখুন'}</button>
+                            <button class="promo-btn">${promo.buttonText || '🔗 দেখুন'}</button>
                         `;
                         const btn = promoEl.querySelector('.promo-btn');
                         btn.onclick = function() {
@@ -1895,7 +1996,7 @@
                     });
                 }
                 
-                // ===== RESULT HELP =====
+                // Result Help
                 if (data.resultHelpEnabled && data.telegramGroup) {
                     DOM.resultHelpSection.style.display = 'block';
                     DOM.helpText.textContent = data.resultHelpMessage || 'ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন';
@@ -1923,8 +2024,6 @@
                 document.getElementById('setResultHelpMessage').value = data.resultHelpMessage || '';
                 document.getElementById('setMonetagZone').value = data.monetagZoneId || '';
                 document.getElementById('setMonetagReferral').value = data.monetagReferralLink || '';
-                
-                // Load promotions
                 loadPromotionsUI(data.promotions || []);
             }
             
@@ -2173,6 +2272,7 @@
                 }
             }
             
+            // ✅ FIX 2: OFFICIAL WEBSITE OPENS IN TELEGRAM INTERNAL BROWSER
             function handleOpenOfficial() {
                 if (state.isOpeningOfficial) return;
                 if (!state.isOnline) {
@@ -2185,6 +2285,8 @@
                 showLoading('সরকারি website খোলা হচ্ছে...');
                 
                 var url = APP_CONFIG.OFFICIAL_RESULT_URL;
+                
+                // ✅ Telegram Internal Browser-এ Open করার চেষ্টা
                 var success = TelegramModule.openUrl(url);
                 
                 setTimeout(function() {
@@ -2199,20 +2301,27 @@
                 }, 600);
             }
             
+            // ✅ FIX 4: SHARE TELEGRAM MINI APP LINK (NOT LONG URL)
             function handleShare() {
                 if (state.isSharing) return;
                 state.isSharing = true;
                 DOM.shareBtn.disabled = true;
                 
-                var shareUrl = window.location.href.split('?')[0];
-                var shareText = '🎓 Education Result — SSC ও HSC ফলাফল দেখুন: ';
+                // ✅ Telegram Mini App Link তৈরি করুন
+                var botUsername = APP_CONFIG.BOT_USERNAME;
+                var shortName = APP_CONFIG.MINI_APP_SHORT_NAME;
+                var miniAppLink = 'https://t.me/' + botUsername + '/' + shortName;
+                
+                var shareText = '🎓 Education Result — SSC ও HSC ফলাফল দেখুন';
                 
                 if (state.isTelegram) {
                     var tg = TelegramModule.getWebApp();
                     try {
                         if (tg && tg.openLink) {
-                            var botLink = 'https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText);
-                            tg.openLink(botLink);
+                            var telegramShareLink = 'https://t.me/share/url?url=' + 
+                                encodeURIComponent(miniAppLink) + 
+                                '&text=' + encodeURIComponent(shareText);
+                            tg.openLink(telegramShareLink);
                             state.isSharing = false;
                             DOM.shareBtn.disabled = false;
                             showToast('শেয়ার ডায়ালগ খোলা হচ্ছে...');
@@ -2225,7 +2334,7 @@
                     navigator.share({
                         title: 'Education Result — SSC ও HSC',
                         text: shareText,
-                        url: shareUrl
+                        url: miniAppLink
                     }).then(function() {
                         state.isSharing = false;
                         DOM.shareBtn.disabled = false;
@@ -2234,11 +2343,11 @@
                         state.isSharing = false;
                         DOM.shareBtn.disabled = false;
                         if (err.name !== 'AbortError') {
-                            copyToClipboard(shareUrl);
+                            copyToClipboard(miniAppLink);
                         }
                     });
                 } else {
-                    copyToClipboard(shareUrl);
+                    copyToClipboard(miniAppLink);
                 }
             }
             
@@ -2247,7 +2356,7 @@
                     navigator.clipboard.writeText(text).then(function() {
                         state.isSharing = false;
                         DOM.shareBtn.disabled = false;
-                        showToast('📋 লিংক কপি হয়েছে!');
+                        showToast('📋 Mini App Link কপি হয়েছে!');
                     }).catch(function() { fallbackCopy(text); });
                 } else {
                     fallbackCopy(text);
@@ -2263,7 +2372,7 @@
                 textarea.select();
                 try {
                     document.execCommand('copy');
-                    showToast('📋 লিংক কপি হয়েছে!');
+                    showToast('📋 Mini App Link কপি হয়েছে!');
                 } catch (e) {
                     showToast('লিংক কপি করতে সমস্যা হয়েছে।');
                 }
@@ -2312,10 +2421,14 @@
                 DOM.confirmationModal.classList.remove('active');
                 DOM.confirmationModal.style.display = 'none';
                 state.currentPage = 'home';
+                window.APP_STATE.currentPage = 'home';
                 TelegramModule.showBackButton(false);
                 hideNetworkStateUI();
                 hideRecoveryUI();
             }
+            
+            // ✅ Make showHome accessible globally for Back Button
+            window._showHome = showHome;
             
             function showModal() {
                 DOM.confirmationModal.style.display = 'flex';
@@ -2359,6 +2472,7 @@
                 DOM.guidelinePage.style.display = 'flex';
                 DOM.guidelinePage.classList.add('active');
                 state.currentPage = 'guideline';
+                window.APP_STATE.currentPage = 'guideline';
                 TelegramModule.showBackButton(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
