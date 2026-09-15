@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Board Result Guide</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot, query, where, orderBy, limit, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCoVtvBd_vGvEsKO6Gs2vSHtSKnh6fp5S0",
+            authDomain: "e-result-cf008.firebaseapp.com",
+            projectId: "e-result-cf008",
+            storageBucket: "e-result-cf008.firebasestorage.app",
+            messagingSenderId: "504654227831",
+            appId: "1:504654227831:web:245845183d91bae7931972",
+            measurementId: "G-C3T8891J0E"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        window.db = db;
+        window.auth = auth;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.updateDoc = updateDoc;
+        window.doc = doc;
+        window.deleteDoc = deleteDoc;
+        window.onSnapshot = onSnapshot;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        
+        console.log('✅ Firebase Initialized');
+    </script>
+    
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #2481cc;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f0f0f0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --tg-theme-bg-color: #1f1f1f;
+                --tg-theme-text-color: #ffffff;
+                --tg-theme-hint-color: #888888;
+                --tg-theme-secondary-bg-color: #2a2a2a;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Bengali', Roboto, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px 20px 20px 20px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 16px 0;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+            margin-bottom: 20px;
+        }
+        .header-content { display: flex; align-items: center; gap: 12px; }
+        .header-icon { font-size: 32px; line-height: 1; }
+        .header-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+            cursor: pointer;
+        }
+        .header-text p {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 1px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--tg-theme-hint-color);
+            padding: 4px 10px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4caf50;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .status-dot.warning { background: #ff9800; }
+        .status-dot.error { background: #f44336; }
+        .status-dot.offline { background: #f44336; }
+
+        .app-main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .page { display: none; flex-direction: column; flex: 1; animation: fadeIn 0.3s ease; }
+        .page.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-section { text-align: center; margin-bottom: 28px; }
+        .welcome-section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--tg-theme-text-color);
+        }
+        .welcome-section .subtitle {
+            font-size: 15px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .exam-selector { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+
+        .exam-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            border: none;
+            border-radius: var(--radius);
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: left;
+            width: 100%;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .exam-btn:active { transform: scale(0.97); }
+        .exam-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .exam-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
+        .exam-btn .btn-content { flex: 1; }
+        .exam-btn .btn-title { font-size: 17px; font-weight: 600; display: block; }
+        .exam-btn .btn-sub { font-size: 13px; color: var(--tg-theme-hint-color); display: block; margin-top: 1px; }
+        .exam-btn .btn-arrow { font-size: 18px; color: var(--tg-theme-hint-color); transition: transform var(--transition); }
+        .exam-btn:hover .btn-arrow { transform: translateX(4px); }
+
+        .exam-btn.ssc-btn {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0d47a1;
+        }
+        .exam-btn.hsc-btn {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            color: #4a148c;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .exam-btn.ssc-btn {
+                background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+                color: #e3f2fd;
+            }
+            .exam-btn.hsc-btn {
+                background: linear-gradient(135deg, #311b92 0%, #4a148c 100%);
+                color: #f3e5f5;
+            }
+        }
+
+        /* ===== PROMOTIONS CONTAINER ===== */
+        .promotions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 12px 0 16px 0;
+        }
+        .promotion-card {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            text-align: center;
+            color: white;
+            display: none;
+        }
+        .promotion-card.active { display: block; }
+        .promotion-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .promotion-card p { font-size: 13px; opacity: 0.85; margin-bottom: 10px; }
+        .promo-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: #ffc107;
+            color: #1a237e;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .promo-btn:active { transform: scale(0.95); }
+
+        /* ===== RESULT HELP ===== */
+        .result-help-section {
+            background: rgba(255, 193, 7, 0.12);
+            border-left: 4px solid #ffc107;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin: 12px 0 16px 0;
+            display: none;
+        }
+        .result-help-section .help-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .result-help-section .help-text {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+            line-height: 1.6;
+        }
+        .result-help-section .help-link {
+            display: inline-block;
+            margin-top: 6px;
+            color: var(--tg-theme-link-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* ===== HOME FOOTER ===== */
+        .home-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(128, 128, 128, 0.08);
+            text-align: center;
+        }
+
+        .home-footer .home-badge {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--tg-theme-hint-color);
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
+        .home-footer .home-developed-by {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+            padding: 8px 0 4px 0;
+            opacity: 0.7;
+            letter-spacing: 0.3px;
+        }
+
+        .home-footer .home-developed-by a {
+            color: var(--tg-theme-link-color);
+            text-decoration: none;
+        }
+
+        .home-footer .home-developed-by a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--tg-theme-bg-color);
+            border-radius: var(--radius);
+            padding: 32px 24px 24px 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+        .modal-content h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color);
+        }
+        .modal-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--tg-theme-hint-color);
+            margin-bottom: 24px;
+        }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+        .modal-btn {
+            padding: 16px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 100%;
+        }
+        .modal-btn:active { transform: scale(0.97); }
+        .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .primary-btn { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
+        .secondary-btn { background: transparent; color: var(--tg-theme-hint-color); }
+        .secondary-btn:hover { background: var(--tg-theme-secondary-bg-color); }
+
+        /* ===== GUIDELINE ===== */
+        .guideline-header { text-align: center; margin-bottom: 24px; }
+        .guideline-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+        .guideline-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+        }
+        .guideline-header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 4px;
+        }
+
+        .result-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+        }
+        .result-type-tab {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+        .result-type-tab.active {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            box-shadow: var(--shadow-sm);
+        }
+        .result-type-tab:active { transform: scale(0.97); }
+        .result-type-tab .tab-icon { margin-right: 4px; }
+
+        .guideline-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--tg-theme-button-color);
+            transition: all var(--transition);
+        }
+        .step-item:hover { transform: translateX(4px); box-shadow: var(--shadow-sm); }
+        .step-number {
+            min-width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+            display: block;
+            margin-bottom: 2px;
+        }
+        .step-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--tg-theme-hint-color);
+        }
+        .step-desc strong { color: var(--tg-theme-link-color); }
+
+        .step-item:nth-child(1) { border-left-color: #f44336; }
+        .step-item:nth-child(2) { border-left-color: #ff9800; }
+        .step-item:nth-child(3) { border-left-color: #ffc107; }
+        .step-item:nth-child(4) { border-left-color: #4caf50; }
+        .step-item:nth-child(5) { border-left-color: #2196f3; }
+        .step-item:nth-child(6) { border-left-color: #9c27b0; }
+        .step-item:nth-child(7) { border-left-color: #e91e63; }
+        .step-item:nth-child(8) { border-left-color: #00bcd4; }
+        .step-item:nth-child(9) { border-left-color: #009688; }
+        .step-item:nth-child(10) { border-left-color: #795548; }
+
+        .step-item:nth-child(1) .step-number { background: #f44336; }
+        .step-item:nth-child(2) .step-number { background: #ff9800; }
+        .step-item:nth-child(3) .step-number { background: #ffc107; }
+        .step-item:nth-child(4) .step-number { background: #4caf50; }
+        .step-item:nth-child(5) .step-number { background: #2196f3; }
+        .step-item:nth-child(6) .step-number { background: #9c27b0; }
+        .step-item:nth-child(7) .step-number { background: #e91e63; }
+        .step-item:nth-child(8) .step-number { background: #00bcd4; }
+        .step-item:nth-child(9) .step-number { background: #009688; }
+        .step-item:nth-child(10) .step-number { background: #795548; }
+
+        .notice-box {
+            background: rgba(255, 193, 7, 0.12);
+            border-left: 4px solid #ffc107;
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+        .notice-box .notice-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .notice-box .notice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notice-box .notice-list li {
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--tg-theme-hint-color);
+            padding-left: 6px;
+        }
+        .notice-box .notice-list li::before {
+            content: "• ";
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .guideline-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(128, 128, 128, 0.15);
+        }
+        .official-notice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+        .notice-icon { font-size: 20px; }
+        .official-notice p {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .button-row .official-btn { flex: 2; }
+        .button-row .share-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 18px 16px;
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            border: 2px solid var(--tg-theme-button-color);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            min-width: 80px;
+        }
+        .button-row .share-btn:active { transform: scale(0.97); }
+        .button-row .share-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .official-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px 24px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 100%;
+        }
+        .official-btn:active { transform: scale(0.97); }
+        .official-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ===== GUIDELINE EXTRA LINKS ===== */
+        .guideline-extra-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 12px 0 16px 0;
+            padding: 10px 0;
+            border-top: 1px solid rgba(128, 128, 128, 0.08);
+            border-bottom: 1px solid rgba(128, 128, 128, 0.08);
+        }
+
+        .guideline-extra-links .extra-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all var(--transition);
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .guideline-extra-links .extra-link:active {
+            transform: scale(0.95);
+        }
+
+        .guideline-extra-links .extra-link:hover {
+            opacity: 0.8;
+        }
+
+        .share-section {
+            text-align: center;
+            padding: 12px 0 4px 0;
+        }
+        .share-section .share-message {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+        .share-section .share-message strong {
+            color: var(--tg-theme-link-color);
+        }
+        .guideline-note {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        .share-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s ease;
+            max-width: 90%;
+            text-align: center;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+        }
+        .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .network-state-ui,
+        .recovery-ui {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .network-state-ui.active,
+        .recovery-ui.active { display: flex; }
+        .network-state-ui .state-icon,
+        .recovery-ui .state-icon { font-size: 48px; margin-bottom: 16px; }
+        .network-state-ui h3,
+        .recovery-ui h3 {
+            font-size: 20px;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 8px;
+        }
+        .network-state-ui p,
+        .recovery-ui p {
+            font-size: 15px;
+            color: var(--tg-theme-hint-color);
+            margin-bottom: 20px;
+        }
+        .retry-btn {
+            padding: 12px 32px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .retry-btn:active { transform: scale(0.97); }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay p {
+            color: #ffffff;
+            font-size: 15px;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+
+        /* ================================================================
+           ADMIN LOGIN OVERLAY
+           ================================================================ */
+        .admin-login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .admin-login-overlay.active { display: flex; }
+        .admin-login-box {
+            background: var(--tg-theme-bg-color);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+        .admin-login-box h2 {
+            text-align: center;
+            color: var(--tg-theme-text-color);
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        .admin-login-box p {
+            text-align: center;
+            color: var(--tg-theme-hint-color);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .admin-login-box .input-field {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            font-size: 14px;
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+        }
+        .admin-login-box .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .admin-login-box .btn:active { transform: scale(0.97); }
+        .admin-login-box .login-error {
+            color: #f44336;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* ================================================================
+           ADMIN PANEL (Full Page)
+           ================================================================ */
+        .admin-panel-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--tg-theme-bg-color);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            padding: 16px 20px 20px 20px;
+            overflow-y: auto;
+        }
+        .admin-panel-container.active { display: flex; }
+
+        .admin-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+            margin-bottom: 16px;
+        }
+        .admin-panel-header h2 {
+            font-size: 20px;
+            color: var(--tg-theme-text-color);
+        }
+        .admin-panel-header .close-btn {
+            padding: 6px 16px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .admin-panel-header .close-btn:active { transform: scale(0.95); }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .admin-stat {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .admin-stat .num {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color);
+        }
+        .admin-stat .label {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .admin-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .admin-menu-item {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .admin-menu-item:active { transform: scale(0.95); }
+        .admin-menu-item .icon { font-size: 24px; display: block; }
+        .admin-menu-item .label { font-size: 11px; color: var(--tg-theme-text-color); margin-top: 2px; }
+
+        .admin-content {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            flex: 1;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+        .admin-content h3 {
+            font-size: 16px;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 12px;
+        }
+        .admin-content .field-group {
+            margin-bottom: 10px;
+        }
+        .admin-content .field-group label {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .admin-content .field-group input,
+        .admin-content .field-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: inherit;
+        }
+        .admin-content .field-group textarea { resize: vertical; min-height: 60px; }
+        .admin-content .field-group.checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .admin-content .field-group.checkbox-group input[type="checkbox"] {
+            width: 40px;
+            height: 22px;
+            appearance: none;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .admin-content .field-group.checkbox-group input[type="checkbox"]:checked {
+            background: #1a237e;
+        }
+        .admin-content .field-group.checkbox-group input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+        .admin-content .field-group.checkbox-group input[type="checkbox"]:checked::after {
+            left: 20px;
+        }
+        .admin-content .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 4px;
+            font-family: inherit;
+        }
+        .admin-content .btn:active { transform: scale(0.97); }
+        .admin-content .btn-success { background: #4caf50; }
+        .admin-content .btn-danger { background: #f44336; }
+        .admin-content .btn-warning { background: #ff9800; }
+
+        .admin-user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+            font-size: 13px;
+            color: var(--tg-theme-text-color);
+        }
+
+        /* Promotion item in admin */
+        .promotion-item {
+            background: var(--tg-theme-bg-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(128, 128, 128, 0.1);
+        }
+
+        @media (max-width: 380px) {
+            .app-container { padding: 12px 14px 16px 14px; }
+            .welcome-section h2 { font-size: 20px; }
+            .exam-btn { padding: 14px 16px; }
+            .modal-content { padding: 24px 18px 18px 18px; }
+            .step-title { font-size: 14px; }
+            .step-desc { font-size: 13px; }
+            .result-type-tab { font-size: 12px; padding: 8px 10px; }
+            .button-row { flex-direction: column; }
+            .button-row .share-btn { flex: 1; padding: 14px; }
+            .admin-stats { grid-template-columns: 1fr 1fr; }
+            .admin-menu { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (min-width: 600px) {
+            .app-container { padding: 24px 32px 32px 32px; }
+            .exam-btn { padding: 22px 28px; }
+            .exam-btn .btn-title { font-size: 19px; }
+        }
+
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-auto { margin-top: auto; }
+    </style>
+</head>
+<body>
+    <!-- ===== APP CONTAINER ===== -->
+    <div id="app" class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-content">
+                <span class="header-icon">🎓</span>
+                <div class="header-text">
+                    <h1 id="appTitle">Board Result Guide</h1>
+                    <p id="appSubtitle">SSC ও HSC ফলাফল দেখুন</p>
+                </div>
+            </div>
+            <div class="header-status" id="appStatus" role="status" aria-live="polite">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">Connecting</span>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <main class="app-main" id="appMain">
+            <!-- HOME PAGE -->
+            <section id="homePage" class="page active" role="main">
+                <div class="welcome-section">
+                    <h2>আপনার ফলাফল দেখুন</h2>
+                    <p class="subtitle">SSC ও HSC ফলাফল সরকারি Education Board Results website থেকে দেখুন</p>
+                </div>
+
+                <div class="exam-selector">
+                    <button class="exam-btn ssc-btn" data-exam="ssc" aria-label="SSC Result দেখুন">
+                        <span class="btn-icon">🎓</span>
+                        <div class="btn-content">
+                            <span class="btn-title">SSC Result</span>
+                            <span class="btn-sub">মাধ্যমিক ও সমমান</span>
+                        </div>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="exam-btn hsc-btn" data-exam="hsc" aria-label="HSC Result দেখুন">
+                        <span class="btn-icon">🎓</span>
+                        <div class="btn-content">
+                            <span class="btn-title">HSC Result</span>
+                            <span class="btn-sub">উচ্চ মাধ্যমিক ও সমমান</span>
+                        </div>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+
+                <!-- PROMOTIONS CONTAINER (Dynamic) -->
+                <div id="promotionsContainer" class="promotions-container"></div>
+
+                <!-- RESULT HELP -->
+                <div id="resultHelpSection" class="result-help-section">
+                    <span class="help-title">⚠️ ফলাফল পাচ্ছেন না?</span>
+                    <p class="help-text" id="helpText">ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন</p>
+                    <a id="helpLink" class="help-link" href="#" target="_blank">📢 গ্রুপে যোগ দিন</a>
+                </div>
+
+                <!-- HOME FOOTER -->
+                <div class="home-footer">
+                    <div class="home-badge">📢 Unofficial App · Official Result Website</div>
+                    <div class="home-developed-by" id="developedBy">
+                        Developed by Ab Alim
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONFIRMATION MODAL -->
+            <div id="confirmationModal" class="modal-overlay" role="dialog" aria-modal="true">
+                <div class="modal-content">
+                    <div class="modal-icon">🎓</div>
+                    <h2>Result দেখতে প্রস্তুত?</h2>
+                    <p class="modal-description">
+                        আপনি সরকারি Education Board Results website-এ যাবেন। সেখানে আপনার ফলাফল দেখার জন্য প্রয়োজনীয় তথ্য নিজেকেই দিতে হবে।
+                    </p>
+                    <div class="modal-actions">
+                        <button id="continueBtn" class="modal-btn primary-btn">📋 Guideline দেখুন</button>
+                        <button id="cancelBtn" class="modal-btn secondary-btn">✕ Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GUIDELINE PAGE -->
+            <section id="guidelinePage" class="page" style="display: none;" role="main">
+                <div class="guideline-header">
+                    <span class="guideline-icon">📋</span>
+                    <h2>Result দেখার নিয়ম</h2>
+                    <p>নিচের ধাপগুলো অনুসরণ করে সরকারি ওয়েবসাইট থেকে আপনার ফলাফল দেখুন</p>
+                </div>
+
+                <div class="result-type-tabs" id="resultTypeTabs">
+                    <button class="result-type-tab active" data-type="student" id="studentTab">
+                        <span class="tab-icon">👤</span> আমার ফলাফল
+                    </button>
+                    <button class="result-type-tab" data-type="institute" id="instituteTab">
+                        <span class="tab-icon">🏫</span> প্রতিষ্ঠানের ফলাফল
+                    </button>
+                </div>
+
+                <div class="guideline-steps" id="guidelineSteps"></div>
+
+                <div class="notice-box">
+                    <span class="notice-title">⚠️ তথ্য দেওয়ার আগে মনে রাখুন</span>
+                    <ul class="notice-list">
+                        <li>Roll Number/Institute Code সঠিকভাবে লিখুন।</li>
+                        <li>Registration Number চাইলে সঠিক তথ্য দিন।</li>
+                        <li>CAPTCHA/Verification থাকলে সঠিকভাবে সম্পন্ন করুন।</li>
+                        <li>ভুল তথ্য দিলে ফলাফল নাও আসতে পারে।</li>
+                        <li>Result না এলে কিছুক্ষণ পরে আবার চেষ্টা করুন।</li>
+                        <li>এই অ্যাপ আপনার কোনো তথ্য সংরক্ষণ করে না।</li>
+                    </ul>
+                </div>
+
+                <div class="guideline-footer">
+                    <div class="official-notice">
+                        <span class="notice-icon">🌐</span>
+                        <p>আপনি এখন সরকারি Education Board Results website-এ যাচ্ছেন।</p>
+                    </div>
+
+                    <div class="button-row">
+                        <button id="openOfficialBtn" class="official-btn">🌐 সরকারি Result Website খুলুন</button>
+                        <button id="shareBtn" class="share-btn">📤 শেয়ার</button>
+                    </div>
+
+                    <div class="guideline-extra-links">
+                        <button onclick="openTelegramGroup()" class="extra-link">📢 Telegram Group</button>
+                        <button onclick="openFacebookPage()" class="extra-link">📘 Facebook Page</button>
+                        <button onclick="sendFeedback()" class="extra-link">💬 Feedback</button>
+                    </div>
+
+                    <div class="share-section">
+                        <p class="share-message">
+                            💬 আপনি যদি ফলাফল পেয়ে থাকেন, তাহলে আপনার বন্ধুকে ফলাফল পেতে সাহায্য করুন — 
+                            <strong>এখনই শেয়ার করুন</strong> 📤
+                        </p>
+                    </div>
+                    <p class="guideline-note">💡 ফলাফল দেখার পর আপনার ফোনের স্ক্রিনশট বা ব্রাউজারের Print/Save as PDF অপশন ব্যবহার করতে পারেন।</p>
+                </div>
+            </section>
+
+            <!-- NETWORK STATE -->
+            <div id="networkStateUI" class="network-state-ui">
+                <div class="state-icon">⚠️</div>
+                <h3>ইন্টারনেট সংযোগ নেই</h3>
+                <p>ইন্টারনেট সংযোগ চালু করে আবার চেষ্টা করুন।</p>
+                <button class="retry-btn" id="networkRetryBtn">আবার চেষ্টা করুন</button>
+            </div>
+
+            <!-- RECOVERY UI -->
+            <div id="recoveryUI" class="recovery-ui">
+                <div class="state-icon">⚠️</div>
+                <h3>App প্রস্তুত হতে সমস্যা হয়েছে</h3>
+                <p>দয়া করে আবার চেষ্টা করুন।</p>
+                <button class="retry-btn" id="recoveryRetryBtn">আবার চেষ্টা করুন</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite">
+        <div class="loading-spinner"></div>
+        <p id="loadingMessage">লোড হচ্ছে...</p>
+    </div>
+
+    <!-- SHARE TOAST -->
+    <div id="shareToast" class="share-toast">📋 লিংক কপি হয়েছে!</div>
+
+    <!-- ADMIN LOGIN OVERLAY -->
+    <div id="adminLoginOverlay" class="admin-login-overlay">
+        <div class="admin-login-box">
+            <h2>🔐 Admin Login</h2>
+            <p>Board Result Guide Admin Panel</p>
+            <input class="input-field" id="adminEmail" placeholder="📧 Admin Email" type="email">
+            <input class="input-field" id="adminPassword" placeholder="🔑 Password" type="password">
+            <button class="btn" onclick="handleAdminLogin()">🔓 Login</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanelContainer" class="admin-panel-container">
+        <div class="admin-panel-header">
+            <h2>🔐 Admin Panel</h2>
+            <button class="close-btn" onclick="closeAdminPanel()">✕ Close</button>
+        </div>
+
+        <div class="admin-stats">
+            <div class="admin-stat"><span class="num" id="statUsers">0</span><span class="label">👥 ইউজার</span></div>
+            <div class="admin-stat"><span class="num" id="statToday">0</span><span class="label">📊 আজকে</span></div>
+            <div class="admin-stat"><span class="num" id="statClicks">0</span><span class="label">👆 ক্লিক</span></div>
+        </div>
+
+        <div class="admin-menu">
+            <div class="admin-menu-item" onclick="showAdminSection('dashboard')"><span class="icon">📊</span><span class="label">Dashboard</span></div>
+            <div class="admin-menu-item" onclick="showAdminSection('settings')"><span class="icon">⚙️</span><span class="label">Settings</span></div>
+            <div class="admin-menu-item" onclick="showAdminSection('users')"><span class="icon">👥</span><span class="label">Users</span></div>
+        </div>
+
+        <div class="admin-content" id="adminContent">
+            <!-- Dashboard -->
+            <div id="admin-dashboard">
+                <h3>📊 ড্যাশবোর্ড</h3>
+                <div class="admin-user-item"><span>📱 SSC ক্লিক</span> <strong id="adminSscClicks">0</strong></div>
+                <div class="admin-user-item"><span>📱 HSC ক্লিক</span> <strong id="adminHscClicks">0</strong></div>
+                <div class="admin-user-item"><span>🆕 নতুন ইউজার (আজ)</span> <strong id="adminNewUsers">0</strong></div>
+                <div class="admin-user-item"><span>📅 শেষ আপডেট</span> <strong id="adminLastUpdate">-</strong></div>
+            </div>
+
+            <!-- Settings -->
+            <div id="admin-settings" style="display:none;">
+                <h3>⚙️ সেটিংস</h3>
+                
+                <div class="field-group">
+                    <label>📱 অ্যাপ নাম</label>
+                    <input id="setAppName" placeholder="Board Result Guide">
+                </div>
+                <div class="field-group">
+                    <label>📱 অ্যাপ সাবটাইটেল</label>
+                    <input id="setAppSubtitle" placeholder="SSC ও HSC ফলাফল দেখুন">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">✍️ Developer Info</h4>
+                
+                <div class="field-group">
+                    <label>Developed By (নাম)</label>
+                    <input id="setDevelopedBy" placeholder="Ab Alim">
+                </div>
+                <div class="field-group">
+                    <label>Developed By Link</label>
+                    <input id="setDevelopedByLink" placeholder="https://facebook.com/your-profile">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💬 Feedback</h4>
+                
+                <div class="field-group">
+                    <label>📢 Feedback Telegram Link</label>
+                    <input id="setFeedbackLink" placeholder="https://t.me/your_username">
+                </div>
+                <div class="field-group">
+                    <label>📧 Feedback Email</label>
+                    <input id="setFeedbackEmail" placeholder="example@gmail.com">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">🔗 Social Links</h4>
+                
+                <div class="field-group">
+                    <label>📘 Facebook Page/Link</label>
+                    <input id="setFacebookLink" placeholder="https://facebook.com/your-page">
+                </div>
+                <div class="field-group">
+                    <label>📢 Telegram Group</label>
+                    <input id="setTelegramGroup" placeholder="https://t.me/your_group">
+                </div>
+                <div class="field-group">
+                    <label>📢 Telegram Channel</label>
+                    <input id="setTelegramChannel" placeholder="https://t.me/your_channel">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">⚠️ Result Help</h4>
+                
+                <div class="field-group checkbox-group">
+                    <label>Result Help সেকশন</label>
+                    <input type="checkbox" id="setResultHelpEnabled">
+                </div>
+                <div class="field-group">
+                    <label>Help Message</label>
+                    <textarea id="setResultHelpMessage" placeholder="ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন"></textarea>
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <h4 style="font-size:14px;color:var(--tg-theme-text-color);">📢 Promotions (Multiple)</h4>
+                    <button class="btn btn-success" onclick="addPromotion()" style="width:auto;padding:6px 16px;font-size:12px;margin:0;">➕ Add</button>
+                </div>
+                <div id="promotionsAdminContainer"></div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag</h4>
+                
+                <div class="field-group">
+                    <label>Zone ID</label>
+                    <input id="setMonetagZone" placeholder="1234567890">
+                </div>
+                <div class="field-group">
+                    <label>Referral Link</label>
+                    <input id="setMonetagReferral" placeholder="https://monetag.com/ref/your-username">
+                </div>
+                
+                <button class="btn btn-success" onclick="saveAllSettings()">💾 সব সেটিংস সেভ করুন</button>
+            </div>
+
+            <!-- Users -->
+            <div id="admin-users" style="display:none;">
+                <h3>👥 ইউজার লিস্ট</h3>
+                <div id="adminUserList"><div class="admin-user-item"><span>Loading...</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // CONFIGURATION
+        // ====================================================================
+        const APP_CONFIG = {
+            OFFICIAL_RESULT_URL: 'https://www.educationboardresults.gov.bd/',
+            
+            SSC_STUDENT_STEPS: [
+                { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
+                { icon: '🎓', title: 'Examination নির্বাচন করুন', desc: '<strong>SSC/Dakhil/Equivalent</strong> নির্বাচন করুন।' },
+                { icon: '📅', title: 'পরীক্ষার বছর নির্বাচন করুন', desc: 'আপনি যে বছর পরীক্ষা দিয়েছেন সেই বছর নির্বাচন করুন।' },
+                { icon: '🏫', title: 'শিক্ষা বোর্ড নির্বাচন করুন', desc: 'আপনার <strong>শিক্ষা বোর্ড</strong> নির্বাচন করুন।' },
+                { icon: '🔢', title: 'Roll Number লিখুন', desc: 'আপনার <strong>রোল নম্বর</strong> সঠিকভাবে লিখুন।' },
+                { icon: '📝', title: 'Registration Number লিখুন', desc: 'যদি প্রয়োজন হয়, <strong>রেজিস্ট্রেশন নম্বর</strong> লিখুন।' },
+                { icon: '🔐', title: 'CAPTCHA/Verification সম্পন্ন করুন', desc: 'ওয়েবসাইটে থাকলে <strong>ক্যাপচা/ভেরিফিকেশন</strong> সম্পন্ন করুন।' },
+                { icon: '✅', title: 'Submit/Result বাটনে ক্লিক করুন', desc: 'সব তথ্য আবার মিলিয়ে <strong>Submit/Result</strong> বাটনে ক্লিক করুন।' },
+                { icon: '📄', title: 'ফলাফল দেখুন', desc: 'আপনার <strong>ফলাফল</strong> প্রদর্শিত হলে দেখে নিন।' },
+                { icon: '📱', title: 'ফলাফল সংরক্ষণ করুন', desc: 'প্রয়োজন হলে <strong>Screenshot</strong> অথবা Save/Print অপশন ব্যবহার করুন।' }
+            ],
+            SSC_INSTITUTE_STEPS: [
+                { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
+                { icon: '🎓', title: 'Examination নির্বাচন করুন', desc: '<strong>SSC/Dakhil/Equivalent</strong> নির্বাচন করুন।' },
+                { icon: '📅', title: 'পরীক্ষার বছর নির্বাচন করুন', desc: 'যে বছরের ফলাফল দেখতে চান সেই বছর নির্বাচন করুন।' },
+                { icon: '🏫', title: 'শিক্ষা বোর্ড নির্বাচন করুন', desc: 'আপনার প্রতিষ্ঠানের <strong>শিক্ষা বোর্ড</strong> নির্বাচন করুন।' },
+                { icon: '🏢', title: 'Institute/EIIN তথ্য দিন', desc: 'আপনার প্রতিষ্ঠানের <strong>EIIN নম্বর</strong> সঠিকভাবে লিখুন।' },
+                { icon: '🔐', title: 'CAPTCHA/Verification সম্পন্ন করুন', desc: 'ওয়েবসাইটে থাকলে <strong>ক্যাপচা/ভেরিফিকেশন</strong> সম্পন্ন করুন।' },
+                { icon: '✅', title: 'Submit/Result বাটনে ক্লিক করুন', desc: 'সব তথ্য আবার মিলিয়ে <strong>Submit/Result</strong> বাটনে ক্লিক করুন।' },
+                { icon: '📄', title: 'প্রতিষ্ঠানের ফলাফল দেখুন', desc: 'আপনার প্রতিষ্ঠানের <strong>সামগ্রিক ফলাফল</strong> প্রদর্শিত হলে দেখে নিন।' },
+                { icon: '📱', title: 'ফলাফল সংরক্ষণ করুন', desc: 'প্রয়োজন হলে <strong>Screenshot</strong> অথবা Save/Print অপশন ব্যবহার করুন।' }
+            ],
+            HSC_STUDENT_STEPS: [
+                { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
+                { icon: '🎓', title: 'Examination নির্বাচন করুন', desc: '<strong>HSC/Alim/Equivalent</strong> নির্বাচন করুন।' },
+                { icon: '📅', title: 'পরীক্ষার বছর নির্বাচন করুন', desc: 'আপনি যে বছর পরীক্ষা দিয়েছেন সেই বছর নির্বাচন করুন।' },
+                { icon: '🏫', title: 'শিক্ষা বোর্ড নির্বাচন করুন', desc: 'আপনার <strong>শিক্ষা বোর্ড</strong> নির্বাচন করুন।' },
+                { icon: '🔢', title: 'Roll Number লিখুন', desc: 'আপনার <strong>রোল নম্বর</strong> সঠিকভাবে লিখুন।' },
+                { icon: '📝', title: 'Registration Number লিখুন', desc: 'যদি প্রয়োজন হয়, <strong>রেজিস্ট্রেশন নম্বর</strong> লিখুন।' },
+                { icon: '🔐', title: 'CAPTCHA/Verification সম্পন্ন করুন', desc: 'ওয়েবসাইটে থাকলে <strong>ক্যাপচা/ভেরিফিকেশন</strong> সম্পন্ন করুন।' },
+                { icon: '✅', title: 'Submit/Result বাটনে ক্লিক করুন', desc: 'সব তথ্য আবার মিলিয়ে <strong>Submit/Result</strong> বাটনে ক্লিক করুন।' },
+                { icon: '📄', title: 'ফলাফল দেখুন', desc: 'আপনার <strong>ফলাফল</strong> প্রদর্শিত হলে দেখে নিন।' },
+                { icon: '📱', title: 'ফলাফল সংরক্ষণ করুন', desc: 'প্রয়োজন হলে <strong>Screenshot</strong> অথবা Save/Print অপশন ব্যবহার করুন।' }
+            ],
+            HSC_INSTITUTE_STEPS: [
+                { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
+                { icon: '🎓', title: 'Examination নির্বাচন করুন', desc: '<strong>HSC/Alim/Equivalent</strong> নির্বাচন করুন।' },
+                { icon: '📅', title: 'পরীক্ষার বছর নির্বাচন করুন', desc: 'যে বছরের ফলাফল দেখতে চান সেই বছর নির্বাচন করুন।' },
+                { icon: '🏫', title: 'শিক্ষা বোর্ড নির্বাচন করুন', desc: 'আপনার প্রতিষ্ঠানের <strong>শিক্ষা বোর্ড</strong> নির্বাচন করুন।' },
+                { icon: '🏢', title: 'Institute/EIIN তথ্য দিন', desc: 'আপনার প্রতিষ্ঠানের <strong>EIIN নম্বর</strong> সঠিকভাবে লিখুন।' },
+                { icon: '🔐', title: 'CAPTCHA/Verification সম্পন্ন করুন', desc: 'ওয়েবসাইটে থাকলে <strong>ক্যাপচা/ভেরিফিকেশন</strong> সম্পন্ন করুন।' },
+                { icon: '✅', title: 'Submit/Result বাটনে ক্লিক করুন', desc: 'সব তথ্য আবার মিলিয়ে <strong>Submit/Result</strong> বাটনে ক্লিক করুন।' },
+                { icon: '📄', title: 'প্রতিষ্ঠানের ফলাফল দেখুন', desc: 'আপনার প্রতিষ্ঠানের <strong>সামগ্রিক ফলাফল</strong> প্রদর্শিত হলে দেখে নিন।' },
+                { icon: '📱', title: 'ফলাফল সংরক্ষণ করুন', desc: 'প্রয়োজন হলে <strong>Screenshot</strong> অথবা Save/Print অপশন ব্যবহার করুন।' }
+            ]
+        };
+
+        // ====================================================================
+        // TELEGRAM MODULE
+        // ====================================================================
+        const TelegramModule = (function() {
+            let tg = null;
+            let isTelegramEnv = false;
+            let initPromise = null;
+            let backButtonHandler = null;
+
+            function init() {
+                if (initPromise) return initPromise;
+                initPromise = new Promise((resolve) => {
+                    try {
+                        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+                            tg = Telegram.WebApp;
+                            isTelegramEnv = true;
+                            tg.expand();
+                            applyTheme(tg.themeParams || {});
+                            tg.onEvent('themeChanged', function() {
+                                applyTheme(tg.themeParams || {});
+                            });
+                            console.log('[Telegram] WebApp initialized');
+                            resolve({ success: true, env: 'telegram' });
+                        } else {
+                            isTelegramEnv = false;
+                            console.log('[Telegram] Not in Telegram environment');
+                            resolve({ success: true, env: 'web' });
+                        }
+                    } catch (error) {
+                        console.warn('[Telegram] Init error:', error);
+                        isTelegramEnv = false;
+                        resolve({ success: false, env: 'web', error: error.message });
+                    }
+                });
+                return initPromise;
+            }
+
+            function applyTheme(themeParams) {
+                const root = document.documentElement;
+                if (!themeParams || Object.keys(themeParams).length === 0) {
+                    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.style.setProperty('--tg-theme-bg-color', isDark ? '#1f1f1f' : '#ffffff');
+                    root.style.setProperty('--tg-theme-text-color', isDark ? '#ffffff' : '#000000');
+                    root.style.setProperty('--tg-theme-hint-color', isDark ? '#888888' : '#999999');
+                    root.style.setProperty('--tg-theme-secondary-bg-color', isDark ? '#2a2a2a' : '#f0f0f0');
+                    root.style.setProperty('--tg-theme-button-color', isDark ? '#2481cc' : '#2481cc');
+                    root.style.setProperty('--tg-theme-button-text-color', '#ffffff');
+                    root.style.setProperty('--tg-theme-link-color', isDark ? '#6ab0e6' : '#2481cc');
+                    return;
+                }
+                const colorMap = {
+                    'bg_color': '--tg-theme-bg-color',
+                    'text_color': '--tg-theme-text-color',
+                    'hint_color': '--tg-theme-hint-color',
+                    'link_color': '--tg-theme-link-color',
+                    'button_color': '--tg-theme-button-color',
+                    'button_text_color': '--tg-theme-button-text-color',
+                    'secondary_bg_color': '--tg-theme-secondary-bg-color'
+                };
+                for (const [key, cssVar] of Object.entries(colorMap)) {
+                    if (themeParams[key]) {
+                        root.style.setProperty(cssVar, themeParams[key]);
+                    }
+                }
+                if (themeParams.bg_color) {
+                    document.body.style.backgroundColor = themeParams.bg_color;
+                }
+            }
+
+            function isTelegram() { return isTelegramEnv; }
+            function getWebApp() { return tg; }
+
+            function showBackButton(show) {
+                if (!tg) return;
+                try {
+                    if (show) { tg.BackButton.show(); } else { tg.BackButton.hide(); }
+                } catch (error) {}
+            }
+
+            function onBackButton(callback) {
+                if (!tg) return;
+                try {
+                    if (backButtonHandler) {
+                        tg.BackButton.offClick(backButtonHandler);
+                    }
+                    backButtonHandler = callback;
+                    tg.BackButton.onClick(callback);
+                } catch (error) {}
+            }
+
+            function showAlert(message) {
+                if (tg && tg.showAlert) {
+                    tg.showAlert(message);
+                } else {
+                    alert(message);
+                }
+            }
+
+            function openUrl(url) {
+                try {
+                    if (tg && tg.openLink) {
+                        tg.openLink(url);
+                        return true;
+                    } else {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('[Telegram] Open URL error:', error);
+                    try {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+            }
+
+            function hapticFeedback(type) {
+                if (!tg || !tg.HapticFeedback) return;
+                try {
+                    if (['light', 'medium', 'heavy', 'rigid', 'soft'].includes(type)) {
+                        tg.HapticFeedback.impactOccurred(type);
+                    } else if (['success', 'warning', 'error'].includes(type)) {
+                        tg.HapticFeedback.notificationOccurred(type);
+                    } else {
+                        tg.HapticFeedback.selectionChanged();
+                    }
+                } catch (error) {}
+            }
+
+            return {
+                init: init,
+                isTelegram: isTelegram,
+                getWebApp: getWebApp,
+                showBackButton: showBackButton,
+                onBackButton: onBackButton,
+                showAlert: showAlert,
+                openUrl: openUrl,
+                hapticFeedback: hapticFeedback,
+                applyTheme: applyTheme
+            };
+        })();
+
+        // ====================================================================
+        // GLOBAL STATE (accessible from any function)
+        // ====================================================================
+        window.APP_STATE = {
+            appSettings: null,
+            isTelegram: false
+        };
+
+        // ====================================================================
+        // GUIDELINE EXTRA FUNCTIONS (FIXED - No error)
+        // ====================================================================
+        function openTelegramGroup() {
+            var link = window.APP_STATE.appSettings?.telegramGroup || 'https://t.me/your_group';
+            TelegramModule.openUrl(link);
+            TelegramModule.hapticFeedback('light');
+        }
+
+        function openFacebookPage() {
+            var link = window.APP_STATE.appSettings?.facebookLink || 'https://facebook.com/your_page';
+            TelegramModule.openUrl(link);
+            TelegramModule.hapticFeedback('light');
+        }
+
+        function sendFeedback() {
+            var feedbackLink = window.APP_STATE.appSettings?.feedbackLink || 'https://t.me/your_username';
+            var feedbackEmail = window.APP_STATE.appSettings?.feedbackEmail || 'example@gmail.com';
+            
+            var tg = TelegramModule.getWebApp();
+            if (tg && tg.openLink && feedbackLink) {
+                tg.openLink(feedbackLink);
+                return;
+            }
+            
+            TelegramModule.showAlert(
+                '💬 Feedback\n\n' +
+                'আপনার মতবামত জানান:\n' +
+                '📧 ' + feedbackEmail + '\n' +
+                '📢 ' + feedbackLink
+            );
+        }
+
+        // ====================================================================
+        // PROMOTIONS MANAGEMENT (Multiple)
+        // ====================================================================
+        function addPromotion() {
+            const container = document.getElementById('promotionsAdminContainer');
+            const id = 'promo_' + Date.now();
+            
+            const html = `
+                <div class="promotion-item" data-id="${id}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:600;font-size:13px;color:var(--tg-theme-text-color);">📢 Promotion</span>
+                        <button onclick="removePromotion('${id}')" style="background:#f44336;color:white;border:none;border-radius:4px;padding:2px 10px;font-size:12px;cursor:pointer;">✕</button>
+                    </div>
+                    <div class="field-group checkbox-group">
+                        <label>Enable</label>
+                        <input type="checkbox" class="promo-enabled" data-id="${id}" checked>
+                    </div>
+                    <div class="field-group">
+                        <label>Icon</label>
+                        <input class="promo-icon" data-id="${id}" placeholder="📚" value="📚">
+                    </div>
+                    <div class="field-group">
+                        <label>Title</label>
+                        <input class="promo-title" data-id="${id}" placeholder="📚 প্রস্তুতি নিন">
+                    </div>
+                    <div class="field-group">
+                        <label>Text</label>
+                        <textarea class="promo-text" data-id="${id}" placeholder="SSC/HSC পরীক্ষার সেরা গাইড বই" rows="2"></textarea>
+                    </div>
+                    <div class="field-group">
+                        <label>Link</label>
+                        <input class="promo-link" data-id="${id}" placeholder="https://daraz.com/your-affiliate-link">
+                    </div>
+                    <div class="field-group">
+                        <label>Button Text</label>
+                        <input class="promo-button" data-id="${id}" placeholder="📖 অর্ডার করুন" value="🔗 দেখুন">
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removePromotion(id) {
+            const el = document.querySelector(`.promotion-item[data-id="${id}"]`);
+            if (el) el.remove();
+        }
+
+        function getPromotionsData() {
+            const items = document.querySelectorAll('#promotionsAdminContainer .promotion-item');
+            const promotions = [];
+            items.forEach(el => {
+                const id = el.dataset.id;
+                promotions.push({
+                    id: id,
+                    enabled: el.querySelector('.promo-enabled').checked,
+                    icon: el.querySelector('.promo-icon').value || '📚',
+                    title: el.querySelector('.promo-title').value || '',
+                    text: el.querySelector('.promo-text').value || '',
+                    link: el.querySelector('.promo-link').value || '',
+                    buttonText: el.querySelector('.promo-button').value || '🔗 দেখুন'
+                });
+            });
+            return promotions;
+        }
+
+        function loadPromotionsUI(promotions) {
+            const container = document.getElementById('promotionsAdminContainer');
+            container.innerHTML = '';
+            
+            if (promotions && promotions.length > 0) {
+                promotions.forEach(promo => {
+                    const id = promo.id || 'promo_' + Date.now();
+                    const html = `
+                        <div class="promotion-item" data-id="${id}">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-weight:600;font-size:13px;color:var(--tg-theme-text-color);">📢 Promotion</span>
+                                <button onclick="removePromotion('${id}')" style="background:#f44336;color:white;border:none;border-radius:4px;padding:2px 10px;font-size:12px;cursor:pointer;">✕</button>
+                            </div>
+                            <div class="field-group checkbox-group">
+                                <label>Enable</label>
+                                <input type="checkbox" class="promo-enabled" data-id="${id}" ${promo.enabled !== false ? 'checked' : ''}>
+                            </div>
+                            <div class="field-group">
+                                <label>Icon</label>
+                                <input class="promo-icon" data-id="${id}" placeholder="📚" value="${promo.icon || '📚'}">
+                            </div>
+                            <div class="field-group">
+                                <label>Title</label>
+                                <input class="promo-title" data-id="${id}" placeholder="📚 প্রস্তুতি নিন" value="${promo.title || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>Text</label>
+                                <textarea class="promo-text" data-id="${id}" placeholder="SSC/HSC পরীক্ষার সেরা গাইড বই" rows="2">${promo.text || ''}</textarea>
+                            </div>
+                            <div class="field-group">
+                                <label>Link</label>
+                                <input class="promo-link" data-id="${id}" placeholder="https://daraz.com/your-affiliate-link" value="${promo.link || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>Button Text</label>
+                                <input class="promo-button" data-id="${id}" placeholder="📖 অর্ডার করুন" value="${promo.buttonText || '🔗 দেখুন'}">
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            }
+        }
+
+        // ====================================================================
+        // MAIN APPLICATION
+        // ====================================================================
+        (function() {
+            'use strict';
+            
+            // ===== STATE =====
+            var state = {
+                selectedExam: null,
+                resultType: 'student',
+                isTelegram: false,
+                appReady: false,
+                currentPage: 'home',
+                isOpeningOfficial: false,
+                isSharing: false,
+                isOnline: navigator.onLine,
+                initAttempted: false,
+                isInitializing: false,
+                appSettings: null,
+                isAdmin: false,
+                adminClickCount: 0
+            };
+            
+            // ===== DOM REFS =====
+            var DOM = {
+                homePage: document.getElementById('homePage'),
+                guidelinePage: document.getElementById('guidelinePage'),
+                confirmationModal: document.getElementById('confirmationModal'),
+                loadingOverlay: document.getElementById('loadingOverlay'),
+                loadingMessage: document.getElementById('loadingMessage'),
+                continueBtn: document.getElementById('continueBtn'),
+                cancelBtn: document.getElementById('cancelBtn'),
+                openOfficialBtn: document.getElementById('openOfficialBtn'),
+                shareBtn: document.getElementById('shareBtn'),
+                guidelineSteps: document.getElementById('guidelineSteps'),
+                appStatus: document.getElementById('appStatus'),
+                statusDot: document.getElementById('statusDot'),
+                statusText: document.getElementById('statusText'),
+                appMain: document.getElementById('appMain'),
+                studentTab: document.getElementById('studentTab'),
+                instituteTab: document.getElementById('instituteTab'),
+                shareToast: document.getElementById('shareToast'),
+                networkStateUI: document.getElementById('networkStateUI'),
+                recoveryUI: document.getElementById('recoveryUI'),
+                networkRetryBtn: document.getElementById('networkRetryBtn'),
+                recoveryRetryBtn: document.getElementById('recoveryRetryBtn'),
+                appTitle: document.getElementById('appTitle'),
+                appSubtitle: document.getElementById('appSubtitle'),
+                developedBy: document.getElementById('developedBy'),
+                promotionsContainer: document.getElementById('promotionsContainer'),
+                resultHelpSection: document.getElementById('resultHelpSection'),
+                helpText: document.getElementById('helpText'),
+                helpLink: document.getElementById('helpLink'),
+                // Admin
+                adminLoginOverlay: document.getElementById('adminLoginOverlay'),
+                adminPanelContainer: document.getElementById('adminPanelContainer'),
+                adminEmail: document.getElementById('adminEmail'),
+                adminPassword: document.getElementById('adminPassword'),
+                loginError: document.getElementById('loginError'),
+                statUsers: document.getElementById('statUsers'),
+                statToday: document.getElementById('statToday'),
+                statClicks: document.getElementById('statClicks'),
+                adminSscClicks: document.getElementById('adminSscClicks'),
+                adminHscClicks: document.getElementById('adminHscClicks'),
+                adminNewUsers: document.getElementById('adminNewUsers'),
+                adminLastUpdate: document.getElementById('adminLastUpdate'),
+                adminUserList: document.getElementById('adminUserList')
+            };
+            
+            // ============================================================
+            // INITIALIZATION
+            // ============================================================
+            async function initApp() {
+                if (state.initAttempted || state.isInitializing) return;
+                state.isInitializing = true;
+                
+                try {
+                    showLoading('App প্রস্তুত হচ্ছে...');
+                    updateStatus('connecting', 'Connecting');
+                    showHome();
+                    
+                    if (!state.isOnline) {
+                        showNetworkStateUI();
+                        hideLoading();
+                        state.isInitializing = false;
+                        return;
+                    }
+                    
+                    var telegramResult = await TelegramModule.init();
+                    state.isTelegram = telegramResult.success && telegramResult.env === 'telegram';
+                    window.APP_STATE.isTelegram = state.isTelegram;
+                    
+                    if (state.isTelegram) {
+                        TelegramModule.onBackButton(handleBackButton);
+                    }
+                    
+                    if (!state.initAttempted) {
+                        setupEventListeners();
+                        setupNetworkListeners();
+                        setupAdminLoginTrigger();
+                    }
+                    
+                    await loadSettings();
+                    
+                    state.appReady = true;
+                    state.initAttempted = true;
+                    state.isInitializing = false;
+                    
+                    hideLoading();
+                    showHome();
+                    updateStatus('ready', 'Ready');
+                    hideNetworkStateUI();
+                    hideRecoveryUI();
+                    
+                    console.log('[App] Initialized successfully');
+                    
+                } catch (error) {
+                    console.error('[App] Init error:', error);
+                    state.isInitializing = false;
+                    hideLoading();
+                    showRecoveryUI();
+                }
+            }
+            
+            // ============================================================
+            // SETUP ADMIN LOGIN TRIGGER (5 clicks on app name)
+            // ============================================================
+            function setupAdminLoginTrigger() {
+                const titleEl = DOM.appTitle;
+                titleEl.addEventListener('click', function() {
+                    state.adminClickCount++;
+                    if (state.adminClickCount >= 5) {
+                        state.adminClickCount = 0;
+                        if (state.isAdmin) {
+                            openAdminPanel();
+                        } else {
+                            DOM.adminLoginOverlay.classList.add('active');
+                            DOM.adminLoginOverlay.style.display = 'flex';
+                            DOM.loginError.textContent = '';
+                        }
+                    }
+                    clearTimeout(window._adminClickTimer);
+                    window._adminClickTimer = setTimeout(function() {
+                        state.adminClickCount = 0;
+                    }, 3000);
+                });
+            }
+            
+            // ============================================================
+            // ADMIN PANEL OPEN / CLOSE
+            // ============================================================
+            function openAdminPanel() {
+                DOM.adminPanelContainer.classList.add('active');
+                DOM.adminPanelContainer.style.display = 'flex';
+                loadAdminData();
+            }
+            
+            window.closeAdminPanel = function() {
+                DOM.adminPanelContainer.classList.remove('active');
+                DOM.adminPanelContainer.style.display = 'none';
+            };
+            
+            // ============================================================
+            // FIREBASE: LOAD SETTINGS
+            // ============================================================
+            async function loadSettings() {
+                try {
+                    const docRef = doc(db, 'settings', 'appSettings');
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        state.appSettings = docSnap.data();
+                        window.APP_STATE.appSettings = state.appSettings;
+                        updateAppUI(state.appSettings);
+                        if (state.isAdmin) {
+                            populateAdminFields(state.appSettings);
+                        }
+                    } else {
+                        state.appSettings = {
+                            appName: 'Board Result Guide',
+                            appSubtitle: 'SSC ও HSC ফলাফল দেখুন',
+                            developedBy: 'Ab Alim',
+                            developedByLink: '',
+                            feedbackLink: '',
+                            feedbackEmail: '',
+                            facebookLink: '',
+                            telegramGroup: '',
+                            telegramChannel: '',
+                            resultHelpEnabled: false,
+                            resultHelpMessage: '',
+                            promotions: [],
+                            monetagZoneId: '',
+                            monetagReferralLink: ''
+                        };
+                        window.APP_STATE.appSettings = state.appSettings;
+                        updateAppUI(state.appSettings);
+                    }
+                    
+                } catch (error) {
+                    console.error('Load settings error:', error);
+                }
+            }
+            
+            // ============================================================
+            // UPDATE APP UI
+            // ============================================================
+            function updateAppUI(data) {
+                if (!data) return;
+                
+                if (data.appName) {
+                    DOM.appTitle.textContent = data.appName;
+                    document.title = data.appName;
+                }
+                if (data.appSubtitle) {
+                    DOM.appSubtitle.textContent = data.appSubtitle;
+                }
+                
+                if (data.developedBy) {
+                    if (data.developedByLink) {
+                        DOM.developedBy.innerHTML = `Developed by <a href="${data.developedByLink}" target="_blank">${data.developedBy}</a>`;
+                    } else {
+                        DOM.developedBy.textContent = `Developed by ${data.developedBy}`;
+                    }
+                }
+                
+                // ===== PROMOTIONS (Multiple) =====
+                if (DOM.promotionsContainer) {
+                    DOM.promotionsContainer.innerHTML = '';
+                    const promotions = data.promotions || [];
+                    const enabledPromos = promotions.filter(p => p.enabled !== false && p.link);
+                    
+                    enabledPromos.forEach((promo, index) => {
+                        const promoEl = document.createElement('div');
+                        promoEl.className = 'promotion-card active';
+                        promoEl.innerHTML = `
+                            <h4>${promo.icon || '📢'} ${promo.title || ''}</h4>
+                            <p>${promo.text || ''}</p>
+                            <button class="promo-btn" data-link="${promo.link}">${promo.buttonText || '🔗 দেখুন'}</button>
+                        `;
+                        const btn = promoEl.querySelector('.promo-btn');
+                        btn.onclick = function() {
+                            TelegramModule.openUrl(promo.link);
+                        };
+                        DOM.promotionsContainer.appendChild(promoEl);
+                    });
+                }
+                
+                // ===== RESULT HELP =====
+                if (data.resultHelpEnabled && data.telegramGroup) {
+                    DOM.resultHelpSection.style.display = 'block';
+                    DOM.helpText.textContent = data.resultHelpMessage || 'ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন';
+                    DOM.helpLink.href = data.telegramGroup;
+                } else {
+                    DOM.resultHelpSection.style.display = 'none';
+                }
+            }
+            
+            // ============================================================
+            // ADMIN: POPULATE FIELDS
+            // ============================================================
+            function populateAdminFields(data) {
+                if (!data) return;
+                document.getElementById('setAppName').value = data.appName || 'Board Result Guide';
+                document.getElementById('setAppSubtitle').value = data.appSubtitle || 'SSC ও HSC ফলাফল দেখুন';
+                document.getElementById('setDevelopedBy').value = data.developedBy || 'Ab Alim';
+                document.getElementById('setDevelopedByLink').value = data.developedByLink || '';
+                document.getElementById('setFeedbackLink').value = data.feedbackLink || '';
+                document.getElementById('setFeedbackEmail').value = data.feedbackEmail || '';
+                document.getElementById('setFacebookLink').value = data.facebookLink || '';
+                document.getElementById('setTelegramGroup').value = data.telegramGroup || '';
+                document.getElementById('setTelegramChannel').value = data.telegramChannel || '';
+                document.getElementById('setResultHelpEnabled').checked = data.resultHelpEnabled || false;
+                document.getElementById('setResultHelpMessage').value = data.resultHelpMessage || '';
+                document.getElementById('setMonetagZone').value = data.monetagZoneId || '';
+                document.getElementById('setMonetagReferral').value = data.monetagReferralLink || '';
+                
+                // Load promotions
+                loadPromotionsUI(data.promotions || []);
+            }
+            
+            // ============================================================
+            // ADMIN: SAVE SETTINGS
+            // ============================================================
+            window.saveAllSettings = async function() {
+                try {
+                    const settings = {
+                        appName: document.getElementById('setAppName').value || 'Board Result Guide',
+                        appSubtitle: document.getElementById('setAppSubtitle').value || 'SSC ও HSC ফলাফল দেখুন',
+                        developedBy: document.getElementById('setDevelopedBy').value || 'Ab Alim',
+                        developedByLink: document.getElementById('setDevelopedByLink').value || '',
+                        feedbackLink: document.getElementById('setFeedbackLink').value || '',
+                        feedbackEmail: document.getElementById('setFeedbackEmail').value || '',
+                        facebookLink: document.getElementById('setFacebookLink').value || '',
+                        telegramGroup: document.getElementById('setTelegramGroup').value || '',
+                        telegramChannel: document.getElementById('setTelegramChannel').value || '',
+                        resultHelpEnabled: document.getElementById('setResultHelpEnabled').checked,
+                        resultHelpMessage: document.getElementById('setResultHelpMessage').value || '',
+                        promotions: getPromotionsData(),
+                        monetagZoneId: document.getElementById('setMonetagZone').value || '',
+                        monetagReferralLink: document.getElementById('setMonetagReferral').value || '',
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    const docRef = doc(db, 'settings', 'appSettings');
+                    await setDoc(docRef, settings);
+                    
+                    state.appSettings = settings;
+                    window.APP_STATE.appSettings = settings;
+                    updateAppUI(settings);
+                    showToast('✅ সব সেটিংস সেভ হয়েছে!');
+                    
+                } catch (error) {
+                    console.error('Save error:', error);
+                    showToast('❌ সেভ করতে সমস্যা হয়েছে');
+                }
+            };
+            
+            // ============================================================
+            // ADMIN: LOGIN
+            // ============================================================
+            window.handleAdminLogin = async function() {
+                const email = DOM.adminEmail.value.trim();
+                const password = DOM.adminPassword.value.trim();
+                const errorEl = DOM.loginError;
+                
+                if (!email || !password) {
+                    errorEl.textContent = '❌ ইমেইল ও পাসওয়ার্ড দিন';
+                    return;
+                }
+                
+                errorEl.textContent = '⏳ লগইন হচ্ছে...';
+                
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    const q = query(collection(db, 'admins'), where('email', '==', user.email));
+                    const snap = await getDocs(q);
+                    
+                    if (!snap.empty) {
+                        state.isAdmin = true;
+                        DOM.adminLoginOverlay.classList.remove('active');
+                        DOM.adminLoginOverlay.style.display = 'none';
+                        errorEl.textContent = '';
+                        openAdminPanel();
+                        showToast('✅ Welcome Admin!');
+                    } else {
+                        await signOut(auth);
+                        errorEl.textContent = '❌ আপনি Admin নন!';
+                    }
+                    
+                } catch(error) {
+                    errorEl.textContent = '❌ ভুল ইমেইল বা পাসওয়ার্ড!';
+                    console.error(error);
+                }
+            };
+            
+            // ============================================================
+            // ADMIN: LOAD DATA
+            // ============================================================
+            async function loadAdminData() {
+                try {
+                    const usersSnap = await getDocs(collection(db, 'users'));
+                    const users = usersSnap.docs.map(d => d.data());
+                    
+                    let totalUsers = users.length;
+                    let totalClicks = 0, sscClicks = 0, hscClicks = 0;
+                    let today = new Date().toDateString();
+                    let todayUsers = 0;
+                    
+                    users.forEach(u => {
+                        totalClicks += u.totalClicks || 0;
+                        sscClicks += u.sscClicks || 0;
+                        hscClicks += u.hscClicks || 0;
+                        if (u.lastSeen === today) todayUsers++;
+                    });
+                    
+                    DOM.statUsers.textContent = totalUsers;
+                    DOM.statToday.textContent = todayUsers;
+                    DOM.statClicks.textContent = totalClicks;
+                    DOM.adminSscClicks.textContent = sscClicks;
+                    DOM.adminHscClicks.textContent = hscClicks;
+                    DOM.adminNewUsers.textContent = todayUsers;
+                    DOM.adminLastUpdate.textContent = new Date().toLocaleString();
+                    
+                    let userHtml = '';
+                    let count = 0;
+                    users.slice(0, 10).forEach(u => {
+                        userHtml += `<div class="admin-user-item">
+                            <span>${u.userId || 'Unknown'}</span>
+                            <span>${u.city || 'N/A'} • ${u.device || 'Unknown'}</span>
+                        </div>`;
+                        count++;
+                    });
+                    if (count === 0) userHtml = '<div class="admin-user-item"><span>কোন ইউজার নেই</span></div>';
+                    DOM.adminUserList.innerHTML = userHtml;
+                    
+                    if (!state.appSettings) {
+                        await loadSettings();
+                    }
+                    populateAdminFields(state.appSettings);
+                    
+                } catch (error) {
+                    console.error('Load admin data error:', error);
+                }
+            }
+            
+            // ============================================================
+            // ADMIN: SHOW SECTION
+            // ============================================================
+            window.showAdminSection = function(section) {
+                document.querySelectorAll('#adminContent > div').forEach(el => el.style.display = 'none');
+                const target = document.getElementById(`admin-${section}`);
+                if (target) target.style.display = 'block';
+                
+                if (section === 'users') {
+                    loadAdminData();
+                }
+                if (section === 'settings') {
+                    populateAdminFields(state.appSettings);
+                }
+            };
+            
+            // ============================================================
+            // NETWORK LISTENERS
+            // ============================================================
+            function setupNetworkListeners() {
+                window.addEventListener('online', function() {
+                    state.isOnline = true;
+                    updateStatus('ready', 'Ready');
+                    hideNetworkStateUI();
+                    if (!state.appReady) { initApp(); }
+                });
+                window.addEventListener('offline', function() {
+                    state.isOnline = false;
+                    updateStatus('offline', 'Offline');
+                    showNetworkStateUI();
+                });
+            }
+            
+            // ============================================================
+            // EVENT LISTENERS
+            // ============================================================
+            function setupEventListeners() {
+                document.querySelectorAll('.exam-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        handleExamSelect(this.dataset.exam);
+                    });
+                });
+                
+                DOM.continueBtn.addEventListener('click', handleContinue);
+                DOM.cancelBtn.addEventListener('click', handleCancel);
+                DOM.openOfficialBtn.addEventListener('click', handleOpenOfficial);
+                DOM.shareBtn.addEventListener('click', handleShare);
+                
+                DOM.studentTab.addEventListener('click', function() {
+                    switchResultType('student');
+                });
+                DOM.instituteTab.addEventListener('click', function() {
+                    switchResultType('institute');
+                });
+                
+                DOM.confirmationModal.addEventListener('click', function(e) {
+                    if (e.target === this) { handleCancel(); }
+                });
+                
+                DOM.networkRetryBtn.addEventListener('click', function() {
+                    if (state.isOnline) {
+                        hideNetworkStateUI();
+                        if (!state.appReady) { initApp(); } else { showHome(); }
+                    } else {
+                        TelegramModule.showAlert('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।');
+                    }
+                });
+                
+                DOM.recoveryRetryBtn.addEventListener('click', function() {
+                    hideRecoveryUI();
+                    initApp();
+                });
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        if (DOM.confirmationModal.classList.contains('active')) {
+                            handleCancel();
+                        } else if (DOM.guidelinePage.style.display !== 'none') {
+                            handleBackButton();
+                        } else if (DOM.adminLoginOverlay.classList.contains('active')) {
+                            DOM.adminLoginOverlay.classList.remove('active');
+                            DOM.adminLoginOverlay.style.display = 'none';
+                        } else if (DOM.adminPanelContainer.classList.contains('active')) {
+                            closeAdminPanel();
+                        }
+                    }
+                });
+            }
+            
+            // ============================================================
+            // HANDLERS
+            // ============================================================
+            function handleExamSelect(exam) {
+                if (!state.appReady || !state.isOnline) {
+                    if (!state.isOnline) {
+                        TelegramModule.showAlert('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।');
+                    }
+                    return;
+                }
+                state.selectedExam = exam;
+                state.resultType = 'student';
+                showModal();
+                TelegramModule.hapticFeedback('light');
+            }
+            
+            function handleContinue() {
+                closeModal();
+                showGuidelinePage();
+                TelegramModule.hapticFeedback('light');
+            }
+            
+            function handleCancel() {
+                closeModal();
+                if (state.currentPage === 'guideline') {
+                    showHome();
+                }
+            }
+            
+            function handleOpenOfficial() {
+                if (state.isOpeningOfficial) return;
+                if (!state.isOnline) {
+                    TelegramModule.showAlert('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।');
+                    return;
+                }
+                
+                state.isOpeningOfficial = true;
+                DOM.openOfficialBtn.disabled = true;
+                showLoading('সরকারি website খোলা হচ্ছে...');
+                
+                var url = APP_CONFIG.OFFICIAL_RESULT_URL;
+                var success = TelegramModule.openUrl(url);
+                
+                setTimeout(function() {
+                    state.isOpeningOfficial = false;
+                    DOM.openOfficialBtn.disabled = false;
+                    hideLoading();
+                    if (!success) {
+                        TelegramModule.showAlert('ওয়েবসাইটটি খোলা যায়নি। আবার চেষ্টা করুন।');
+                    } else {
+                        TelegramModule.hapticFeedback('medium');
+                    }
+                }, 600);
+            }
+            
+            function handleShare() {
+                if (state.isSharing) return;
+                state.isSharing = true;
+                DOM.shareBtn.disabled = true;
+                
+                var shareUrl = window.location.href.split('?')[0];
+                var shareText = '🎓 Education Result — SSC ও HSC ফলাফল দেখুন: ';
+                
+                if (state.isTelegram) {
+                    var tg = TelegramModule.getWebApp();
+                    try {
+                        if (tg && tg.openLink) {
+                            var botLink = 'https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText);
+                            tg.openLink(botLink);
+                            state.isSharing = false;
+                            DOM.shareBtn.disabled = false;
+                            showToast('শেয়ার ডায়ালগ খোলা হচ্ছে...');
+                            return;
+                        }
+                    } catch (e) {}
+                }
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Education Result — SSC ও HSC',
+                        text: shareText,
+                        url: shareUrl
+                    }).then(function() {
+                        state.isSharing = false;
+                        DOM.shareBtn.disabled = false;
+                        showToast('শেয়ার করা হয়েছে! ✅');
+                    }).catch(function(err) {
+                        state.isSharing = false;
+                        DOM.shareBtn.disabled = false;
+                        if (err.name !== 'AbortError') {
+                            copyToClipboard(shareUrl);
+                        }
+                    });
+                } else {
+                    copyToClipboard(shareUrl);
+                }
+            }
+            
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        state.isSharing = false;
+                        DOM.shareBtn.disabled = false;
+                        showToast('📋 লিংক কপি হয়েছে!');
+                    }).catch(function() { fallbackCopy(text); });
+                } else {
+                    fallbackCopy(text);
+                }
+            }
+            
+            function fallbackCopy(text) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('📋 লিংক কপি হয়েছে!');
+                } catch (e) {
+                    showToast('লিংক কপি করতে সমস্যা হয়েছে।');
+                }
+                document.body.removeChild(textarea);
+                state.isSharing = false;
+                DOM.shareBtn.disabled = false;
+            }
+            
+            function showToast(message) {
+                DOM.shareToast.textContent = message;
+                DOM.shareToast.classList.add('show');
+                clearTimeout(DOM.shareToast._timeout);
+                DOM.shareToast._timeout = setTimeout(function() {
+                    DOM.shareToast.classList.remove('show');
+                }, 3000);
+            }
+            
+            function handleBackButton() {
+                if (DOM.guidelinePage.style.display !== 'none') {
+                    showHome();
+                } else if (DOM.confirmationModal.classList.contains('active')) {
+                    closeModal();
+                }
+            }
+            
+            // ============================================================
+            // RESULT TYPE SWITCHING
+            // ============================================================
+            function switchResultType(type) {
+                if (state.resultType === type) return;
+                state.resultType = type;
+                DOM.studentTab.classList.toggle('active', type === 'student');
+                DOM.instituteTab.classList.toggle('active', type === 'institute');
+                renderGuidelineSteps();
+                TelegramModule.hapticFeedback('light');
+            }
+            
+            // ============================================================
+            // UI FUNCTIONS
+            // ============================================================
+            function showHome() {
+                DOM.homePage.classList.add('active');
+                DOM.homePage.style.display = 'flex';
+                DOM.guidelinePage.style.display = 'none';
+                DOM.guidelinePage.classList.remove('active');
+                DOM.confirmationModal.classList.remove('active');
+                DOM.confirmationModal.style.display = 'none';
+                state.currentPage = 'home';
+                TelegramModule.showBackButton(false);
+                hideNetworkStateUI();
+                hideRecoveryUI();
+            }
+            
+            function showModal() {
+                DOM.confirmationModal.style.display = 'flex';
+                requestAnimationFrame(function() {
+                    DOM.confirmationModal.classList.add('active');
+                });
+                TelegramModule.showBackButton(true);
+            }
+            
+            function closeModal() {
+                DOM.confirmationModal.classList.remove('active');
+                DOM.confirmationModal.style.display = 'none';
+                if (state.currentPage === 'home') {
+                    TelegramModule.showBackButton(false);
+                }
+            }
+            
+            function renderGuidelineSteps() {
+                var steps;
+                var isStudent = state.resultType === 'student';
+                if (state.selectedExam === 'ssc') {
+                    steps = isStudent ? APP_CONFIG.SSC_STUDENT_STEPS : APP_CONFIG.SSC_INSTITUTE_STEPS;
+                } else {
+                    steps = isStudent ? APP_CONFIG.HSC_STUDENT_STEPS : APP_CONFIG.HSC_INSTITUTE_STEPS;
+                }
+                DOM.guidelineSteps.innerHTML = steps.map(function(step, index) {
+                    return '<div class="step-item">' +
+                        '<span class="step-number">' + (index + 1) + '</span>' +
+                        '<div class="step-content">' +
+                        '<span class="step-title">' + step.icon + ' ' + step.title + '</span>' +
+                        '<span class="step-desc">' + step.desc + '</span>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            }
+            
+            function showGuidelinePage() {
+                renderGuidelineSteps();
+                DOM.homePage.classList.remove('active');
+                DOM.homePage.style.display = 'none';
+                DOM.guidelinePage.style.display = 'flex';
+                DOM.guidelinePage.classList.add('active');
+                state.currentPage = 'guideline';
+                TelegramModule.showBackButton(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            function showLoading(message) {
+                DOM.loadingOverlay.classList.add('active');
+                DOM.loadingOverlay.style.display = 'flex';
+                DOM.loadingMessage.textContent = message || 'লোড হচ্ছে...';
+            }
+            
+            function hideLoading() {
+                DOM.loadingOverlay.classList.remove('active');
+                DOM.loadingOverlay.style.display = 'none';
+            }
+            
+            function updateStatus(status, text) {
+                DOM.statusDot.className = 'status-dot';
+                if (status === 'warning' || status === 'connecting') {
+                    DOM.statusDot.classList.add('warning');
+                } else if (status === 'error' || status === 'offline') {
+                    DOM.statusDot.classList.add('error');
+                }
+                DOM.statusText.textContent = text || 'Ready';
+            }
+            
+            function showNetworkStateUI() {
+                DOM.networkStateUI.classList.add('active');
+                DOM.networkStateUI.style.display = 'flex';
+                DOM.homePage.style.display = 'none';
+                DOM.homePage.classList.remove('active');
+                DOM.guidelinePage.style.display = 'none';
+                DOM.guidelinePage.classList.remove('active');
+                DOM.confirmationModal.style.display = 'none';
+                DOM.confirmationModal.classList.remove('active');
+                hideRecoveryUI();
+            }
+            
+            function hideNetworkStateUI() {
+                DOM.networkStateUI.classList.remove('active');
+                DOM.networkStateUI.style.display = 'none';
+            }
+            
+            function showRecoveryUI() {
+                DOM.recoveryUI.classList.add('active');
+                DOM.recoveryUI.style.display = 'flex';
+                DOM.homePage.style.display = 'none';
+                DOM.homePage.classList.remove('active');
+                DOM.guidelinePage.style.display = 'none';
+                DOM.guidelinePage.classList.remove('active');
+                DOM.confirmationModal.style.display = 'none';
+                DOM.confirmationModal.classList.remove('active');
+                hideNetworkStateUI();
+            }
+            
+            function hideRecoveryUI() {
+                DOM.recoveryUI.classList.remove('active');
+                DOM.recoveryUI.style.display = 'none';
+            }
+            
+            // ============================================================
+            // START APP
+            // ============================================================
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initApp);
+            } else {
+                initApp();
+            }
+            
+        })();
+    </script>
+</body>
+</html>
