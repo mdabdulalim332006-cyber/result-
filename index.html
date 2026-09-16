@@ -26,7 +26,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // ✅ FIX 1: Session Persistence Set করুন
+        // ✅ FIX 1: Session Persistence (Auto-Login)
         setPersistence(auth, browserLocalPersistence)
             .then(() => {
                 console.log('✅ Auth Persistence: Local (Auto-Login enabled)');
@@ -1117,7 +1117,7 @@
 
             <!-- GUIDELINE PAGE -->
             <section id="guidelinePage" class="page" style="display: none;" role="main">
-                <!-- ✅ FIX 3: Visual Back Button -->
+                <!-- ✅ Visual Back Button -->
                 <button class="visual-back-btn" onclick="goBack()">
                     <span>←</span> Back
                 </button>
@@ -1348,10 +1348,9 @@
         const APP_CONFIG = {
             OFFICIAL_RESULT_URL: 'https://www.educationboardresults.gov.bd/',
             
-            // ✅ FIX 4: Telegram Mini App Share Link
-            // আপনার Bot-এর Username এখানে দিন
-            BOT_USERNAME: 'YourBotUsername', // যেমন: BoardResultGuideBot
-            MINI_APP_SHORT_NAME: 'result', // BotFather-এ /setmenubutton দিয়ে সেট করা short name
+            // ✅ Telegram Mini App Share Link
+            BOT_USERNAME: 'BoardResultGuideBot',
+            MINI_APP_SHORT_NAME: 'result',
             
             SSC_STUDENT_STEPS: [
                 { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
@@ -1418,7 +1417,7 @@
                             tg = Telegram.WebApp;
                             isTelegramEnv = true;
                             tg.expand();
-                            tg.ready(); // ✅ FIX: tg.ready() call
+                            tg.ready();
                             applyTheme(tg.themeParams || {});
                             tg.onEvent('themeChanged', function() {
                                 applyTheme(tg.themeParams || {});
@@ -1562,18 +1561,16 @@
         };
 
         // ====================================================================
-        // ✅ FIX 3: GO BACK FUNCTION
+        // GO BACK FUNCTION
         // ====================================================================
         window.goBack = function() {
-            var state = window.APP_STATE;
-            if (state.currentPage === 'guideline') {
-                // Guideline → Home
+            var currentPage = window.APP_STATE.currentPage || 'home';
+            if (currentPage === 'guideline') {
                 if (window._showHome) {
                     window._showHome();
                 }
                 TelegramModule.hapticFeedback('light');
             } else {
-                // Home → Close App (if in Telegram)
                 TelegramModule.closeApp();
             }
         };
@@ -1820,7 +1817,7 @@
                         setupEventListeners();
                         setupNetworkListeners();
                         setupAdminLoginTrigger();
-                        setupAuthListener(); // ✅ FIX 1: Auto-Login Listener
+                        setupAuthListener();
                     }
                     
                     await loadSettings();
@@ -1846,13 +1843,12 @@
             }
             
             // ============================================================
-            // ✅ FIX 1: AUTH LISTENER FOR AUTO-LOGIN
+            // AUTH LISTENER FOR AUTO-LOGIN
             // ============================================================
             function setupAuthListener() {
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         try {
-                            // Check if user is admin
                             const q = query(collection(db, 'admins'), where('email', '==', user.email));
                             const snap = await getDocs(q);
                             
@@ -1974,7 +1970,6 @@
                     }
                 }
                 
-                // Promotions
                 if (DOM.promotionsContainer) {
                     DOM.promotionsContainer.innerHTML = '';
                     const promotions = data.promotions || [];
@@ -1996,7 +1991,6 @@
                     });
                 }
                 
-                // Result Help
                 if (data.resultHelpEnabled && data.telegramGroup) {
                     DOM.resultHelpSection.style.display = 'block';
                     DOM.helpText.textContent = data.resultHelpMessage || 'ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন';
@@ -2272,7 +2266,6 @@
                 }
             }
             
-            // ✅ FIX 2: OFFICIAL WEBSITE OPENS IN TELEGRAM INTERNAL BROWSER
             function handleOpenOfficial() {
                 if (state.isOpeningOfficial) return;
                 if (!state.isOnline) {
@@ -2285,8 +2278,6 @@
                 showLoading('সরকারি website খোলা হচ্ছে...');
                 
                 var url = APP_CONFIG.OFFICIAL_RESULT_URL;
-                
-                // ✅ Telegram Internal Browser-এ Open করার চেষ্টা
                 var success = TelegramModule.openUrl(url);
                 
                 setTimeout(function() {
@@ -2301,13 +2292,11 @@
                 }, 600);
             }
             
-            // ✅ FIX 4: SHARE TELEGRAM MINI APP LINK (NOT LONG URL)
             function handleShare() {
                 if (state.isSharing) return;
                 state.isSharing = true;
                 DOM.shareBtn.disabled = true;
                 
-                // ✅ Telegram Mini App Link তৈরি করুন
                 var botUsername = APP_CONFIG.BOT_USERNAME;
                 var shortName = APP_CONFIG.MINI_APP_SHORT_NAME;
                 var miniAppLink = 'https://t.me/' + botUsername + '/' + shortName;
@@ -2427,7 +2416,6 @@
                 hideRecoveryUI();
             }
             
-            // ✅ Make showHome accessible globally for Back Button
             window._showHome = showHome;
             
             function showModal() {
