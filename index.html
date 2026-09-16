@@ -26,14 +26,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // ✅ FIX 1: Session Persistence (Auto-Login)
         setPersistence(auth, browserLocalPersistence)
-            .then(() => {
-                console.log('✅ Auth Persistence: Local (Auto-Login enabled)');
-            })
-            .catch((error) => {
-                console.error('Persistence error:', error);
-            });
+            .then(() => console.log('✅ Auth Persistence: Local'))
+            .catch((error) => console.error('Persistence error:', error));
         
         window.db = db;
         window.auth = auth;
@@ -180,14 +175,8 @@
             align-self: flex-start;
         }
 
-        .visual-back-btn:active {
-            transform: scale(0.95);
-        }
-
-        .visual-back-btn span {
-            font-size: 18px;
-            line-height: 1;
-        }
+        .visual-back-btn:active { transform: scale(0.95); }
+        .visual-back-btn span { font-size: 18px; line-height: 1; }
 
         .welcome-section { text-align: center; margin-bottom: 28px; }
         .welcome-section h2 {
@@ -315,7 +304,6 @@
             border-top: 1px solid rgba(128, 128, 128, 0.08);
             text-align: center;
         }
-
         .home-footer .home-badge {
             font-size: 12px;
             font-weight: 500;
@@ -323,7 +311,6 @@
             letter-spacing: 0.3px;
             margin-bottom: 6px;
         }
-
         .home-footer .home-developed-by {
             font-size: 14px;
             font-weight: 600;
@@ -332,15 +319,11 @@
             opacity: 0.7;
             letter-spacing: 0.3px;
         }
-
         .home-footer .home-developed-by a {
             color: var(--tg-theme-link-color);
             text-decoration: none;
         }
-
-        .home-footer .home-developed-by a:hover {
-            text-decoration: underline;
-        }
+        .home-footer .home-developed-by a:hover { text-decoration: underline; }
 
         /* ===== MODAL ===== */
         .modal-overlay {
@@ -399,6 +382,151 @@
         .primary-btn { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
         .secondary-btn { background: transparent; color: var(--tg-theme-hint-color); }
         .secondary-btn:hover { background: var(--tg-theme-secondary-bg-color); }
+
+        /* ===== CHANNEL POPUP ===== */
+        .channel-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            backdrop-filter: blur(6px);
+            animation: popupFadeIn 0.4s ease;
+        }
+        .channel-popup-overlay.active { display: flex; }
+
+        @keyframes popupFadeIn {
+            from { opacity: 0; backdrop-filter: blur(0); }
+            to { opacity: 1; backdrop-filter: blur(6px); }
+        }
+
+        @keyframes popupSlideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .channel-popup-content {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            border-radius: 20px;
+            padding: 32px 24px 24px 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: popupSlideUp 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .channel-popup-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 193, 7, 0.15) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .channel-popup-icon {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 16px;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .channel-popup-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+        }
+
+        .channel-popup-text {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .channel-popup-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px 24px;
+            background: #ffc107;
+            color: #1a237e;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3);
+            position: relative;
+            z-index: 1;
+            font-family: inherit;
+        }
+        .channel-popup-btn:active { transform: scale(0.97); }
+        .channel-popup-btn:hover { background: #ffca28; }
+
+        .channel-popup-skip {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: all var(--transition);
+            font-family: inherit;
+            position: relative;
+            z-index: 1;
+        }
+        .channel-popup-skip:hover { color: #ffffff; }
+
+        .channel-popup-sparkle {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.6;
+            animation: float 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .channel-popup-sparkle.s1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .channel-popup-sparkle.s2 { top: 25%; right: 12%; animation-delay: 1s; }
+        .channel-popup-sparkle.s3 { bottom: 20%; left: 15%; animation-delay: 2s; }
+        .channel-popup-sparkle.s4 { bottom: 30%; right: 10%; animation-delay: 1.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-15px) rotate(15deg); opacity: 0.9; }
+        }
 
         /* ===== GUIDELINE ===== */
         .guideline-header { text-align: center; margin-bottom: 24px; }
@@ -609,7 +737,6 @@
         .official-btn:active { transform: scale(0.97); }
         .official-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* ===== GUIDELINE EXTRA LINKS ===== */
         .guideline-extra-links {
             display: flex;
             flex-wrap: wrap;
@@ -637,13 +764,8 @@
             font-family: inherit;
         }
 
-        .guideline-extra-links .extra-link:active {
-            transform: scale(0.95);
-        }
-
-        .guideline-extra-links .extra-link:hover {
-            opacity: 0.8;
-        }
+        .guideline-extra-links .extra-link:active { transform: scale(0.95); }
+        .guideline-extra-links .extra-link:hover { opacity: 0.8; }
 
         .share-section {
             text-align: center;
@@ -1022,6 +1144,8 @@
             .button-row .share-btn { flex: 1; padding: 14px; }
             .admin-stats { grid-template-columns: 1fr 1fr; }
             .admin-menu { grid-template-columns: 1fr 1fr; }
+            .channel-popup-title { font-size: 18px; }
+            .channel-popup-icon { font-size: 48px; }
         }
 
         @media (min-width: 600px) {
@@ -1081,17 +1205,14 @@
                     </button>
                 </div>
 
-                <!-- PROMOTIONS CONTAINER (Dynamic) -->
                 <div id="promotionsContainer" class="promotions-container"></div>
 
-                <!-- RESULT HELP -->
                 <div id="resultHelpSection" class="result-help-section">
                     <span class="help-title">⚠️ ফলাফল পাচ্ছেন না?</span>
                     <p class="help-text" id="helpText">ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন</p>
                     <a id="helpLink" class="help-link" href="#" target="_blank">📢 গ্রুপে যোগ দিন</a>
                 </div>
 
-                <!-- HOME FOOTER -->
                 <div class="home-footer">
                     <div class="home-badge">📢 Unofficial App · Official Result Website</div>
                     <div class="home-developed-by" id="developedBy">
@@ -1117,7 +1238,6 @@
 
             <!-- GUIDELINE PAGE -->
             <section id="guidelinePage" class="page" style="display: none;" role="main">
-                <!-- ✅ Visual Back Button -->
                 <button class="visual-back-btn" onclick="goBack()">
                     <span>←</span> Back
                 </button>
@@ -1164,6 +1284,7 @@
 
                     <div class="guideline-extra-links">
                         <button onclick="openTelegramGroup()" class="extra-link">📢 Telegram Group</button>
+                        <button onclick="openTelegramChannel()" class="extra-link">📢 Telegram Channel</button>
                         <button onclick="openFacebookPage()" class="extra-link">📘 Facebook Page</button>
                         <button onclick="sendFeedback()" class="extra-link">💬 Feedback</button>
                     </div>
@@ -1204,6 +1325,27 @@
 
     <!-- SHARE TOAST -->
     <div id="shareToast" class="share-toast">📋 লিংক কপি হয়েছে!</div>
+
+    <!-- ===== CHANNEL POPUP ===== -->
+    <div id="channelPopup" class="channel-popup-overlay">
+        <div class="channel-popup-content">
+            <span class="channel-popup-sparkle s1">✨</span>
+            <span class="channel-popup-sparkle s2">⭐</span>
+            <span class="channel-popup-sparkle s3">✨</span>
+            <span class="channel-popup-sparkle s4">⭐</span>
+            
+            <span class="channel-popup-icon" id="channelPopupIcon">📢</span>
+            <h2 class="channel-popup-title" id="channelPopupTitle">আমাদের Telegram Channel-এ যোগ দিন!</h2>
+            <p class="channel-popup-text" id="channelPopupText">SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে</p>
+            
+            <button class="channel-popup-btn" onclick="joinChannelFromPopup()" id="channelPopupBtn">
+                📢 Channel-এ যোগ দিন
+            </button>
+            <button class="channel-popup-skip" onclick="closeChannelPopup()" id="channelPopupSkip">
+                ✕ পরে দেখবো
+            </button>
+        </div>
+    </div>
 
     <!-- ADMIN LOGIN OVERLAY -->
     <div id="adminLoginOverlay" class="admin-login-overlay">
@@ -1300,6 +1442,34 @@
                 </div>
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">📢 Channel Popup</h4>
+                
+                <div class="field-group checkbox-group">
+                    <label>Popup Enable করুন</label>
+                    <input type="checkbox" id="setChannelPopupEnabled">
+                </div>
+                <div class="field-group">
+                    <label>Popup Title</label>
+                    <input id="setChannelPopupTitle" placeholder="আমাদের Telegram Channel-এ যোগ দিন!">
+                </div>
+                <div class="field-group">
+                    <label>Popup Text</label>
+                    <textarea id="setChannelPopupText" placeholder="SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে"></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Button Text</label>
+                    <input id="setChannelPopupButton" placeholder="📢 Channel-এ যোগ দিন">
+                </div>
+                <div class="field-group">
+                    <label>Skip Button Text</label>
+                    <input id="setChannelPopupSkip" placeholder="✕ পরে দেখবো">
+                </div>
+                <div class="field-group">
+                    <label>Icon (Emoji)</label>
+                    <input id="setChannelPopupIcon" placeholder="📢" value="📢">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
                 <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">⚠️ Result Help</h4>
                 
                 <div class="field-group checkbox-group">
@@ -1347,10 +1517,9 @@
         // ====================================================================
         const APP_CONFIG = {
             OFFICIAL_RESULT_URL: 'https://www.educationboardresults.gov.bd/',
-            
-            // ✅ Telegram Mini App Share Link
             BOT_USERNAME: 'BoardResultGuideBot',
             MINI_APP_SHORT_NAME: 'result',
+            CHANNEL_POPUP_DELAY: 2000, // ২ সেকেন্ড
             
             SSC_STUDENT_STEPS: [
                 { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
@@ -1557,7 +1726,8 @@
         // ====================================================================
         window.APP_STATE = {
             appSettings: null,
-            isTelegram: false
+            isTelegram: false,
+            channelPopupShown: false
         };
 
         // ====================================================================
@@ -1576,10 +1746,75 @@
         };
 
         // ====================================================================
+        // CHANNEL POPUP FUNCTIONS
+        // ====================================================================
+        window.closeChannelPopup = function() {
+            var popup = document.getElementById('channelPopup');
+            if (popup) {
+                popup.classList.remove('active');
+                popup.style.display = 'none';
+            }
+            window.APP_STATE.channelPopupShown = true;
+            TelegramModule.hapticFeedback('light');
+        };
+
+        window.joinChannelFromPopup = function() {
+            var channelLink = window.APP_STATE.appSettings?.telegramChannel || '';
+            if (channelLink) {
+                TelegramModule.openUrl(channelLink);
+                TelegramModule.hapticFeedback('success');
+            }
+            setTimeout(function() {
+                window.closeChannelPopup();
+            }, 500);
+        };
+
+        function showChannelPopup() {
+            // Already shown in this session?
+            if (window.APP_STATE.channelPopupShown) return;
+            
+            var settings = window.APP_STATE.appSettings;
+            if (!settings) return;
+            
+            // Check if enabled and channel link exists
+            if (!settings.channelPopupEnabled || !settings.telegramChannel) return;
+            
+            // Set popup content
+            var iconEl = document.getElementById('channelPopupIcon');
+            var titleEl = document.getElementById('channelPopupTitle');
+            var textEl = document.getElementById('channelPopupText');
+            var btnEl = document.getElementById('channelPopupBtn');
+            var skipEl = document.getElementById('channelPopupSkip');
+            
+            if (iconEl) iconEl.textContent = settings.channelPopupIcon || '📢';
+            if (titleEl) titleEl.textContent = settings.channelPopupTitle || 'আমাদের Telegram Channel-এ যোগ দিন!';
+            if (textEl) textEl.textContent = settings.channelPopupText || 'SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে';
+            if (btnEl) btnEl.textContent = settings.channelPopupButton || '📢 Channel-এ যোগ দিন';
+            if (skipEl) skipEl.textContent = settings.channelPopupSkip || '✕ পরে দেখবো';
+            
+            // Show popup after delay
+            setTimeout(function() {
+                if (window.APP_STATE.channelPopupShown) return;
+                var popup = document.getElementById('channelPopup');
+                if (popup) {
+                    popup.classList.add('active');
+                    popup.style.display = 'flex';
+                    TelegramModule.hapticFeedback('medium');
+                }
+            }, APP_CONFIG.CHANNEL_POPUP_DELAY);
+        }
+
+        // ====================================================================
         // GUIDELINE EXTRA FUNCTIONS
         // ====================================================================
         function openTelegramGroup() {
             var link = window.APP_STATE.appSettings?.telegramGroup || 'https://t.me/your_group';
+            TelegramModule.openUrl(link);
+            TelegramModule.hapticFeedback('light');
+        }
+
+        function openTelegramChannel() {
+            var link = window.APP_STATE.appSettings?.telegramChannel || 'https://t.me/your_channel';
             TelegramModule.openUrl(link);
             TelegramModule.hapticFeedback('light');
         }
@@ -1724,7 +1959,6 @@
         (function() {
             'use strict';
             
-            // ===== STATE =====
             var state = {
                 selectedExam: null,
                 resultType: 'student',
@@ -1741,7 +1975,6 @@
                 adminClickCount: 0
             };
             
-            // ===== DOM REFS =====
             var DOM = {
                 homePage: document.getElementById('homePage'),
                 guidelinePage: document.getElementById('guidelinePage'),
@@ -1786,9 +2019,6 @@
                 adminUserList: document.getElementById('adminUserList')
             };
             
-            // ============================================================
-            // INITIALIZATION
-            // ============================================================
             async function initApp() {
                 if (state.initAttempted || state.isInitializing) return;
                 state.isInitializing = true;
@@ -1832,6 +2062,9 @@
                     hideNetworkStateUI();
                     hideRecoveryUI();
                     
+                    // ✅ Show Channel Popup after delay
+                    showChannelPopup();
+                    
                     console.log('[App] Initialized successfully');
                     
                 } catch (error) {
@@ -1842,9 +2075,6 @@
                 }
             }
             
-            // ============================================================
-            // AUTH LISTENER FOR AUTO-LOGIN
-            // ============================================================
             function setupAuthListener() {
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
@@ -1869,9 +2099,6 @@
                 });
             }
             
-            // ============================================================
-            // SETUP ADMIN LOGIN TRIGGER
-            // ============================================================
             function setupAdminLoginTrigger() {
                 const titleEl = DOM.appTitle;
                 titleEl.addEventListener('click', function() {
@@ -1893,9 +2120,6 @@
                 });
             }
             
-            // ============================================================
-            // ADMIN PANEL OPEN / CLOSE
-            // ============================================================
             function openAdminPanel() {
                 DOM.adminPanelContainer.classList.add('active');
                 DOM.adminPanelContainer.style.display = 'flex';
@@ -1907,9 +2131,6 @@
                 DOM.adminPanelContainer.style.display = 'none';
             };
             
-            // ============================================================
-            // FIREBASE: LOAD SETTINGS
-            // ============================================================
             async function loadSettings() {
                 try {
                     const docRef = doc(db, 'settings', 'appSettings');
@@ -1933,6 +2154,12 @@
                             facebookLink: '',
                             telegramGroup: '',
                             telegramChannel: '',
+                            channelPopupEnabled: false,
+                            channelPopupTitle: 'আমাদের Telegram Channel-এ যোগ দিন!',
+                            channelPopupText: 'SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে',
+                            channelPopupButton: '📢 Channel-এ যোগ দিন',
+                            channelPopupSkip: '✕ পরে দেখবো',
+                            channelPopupIcon: '📢',
                             resultHelpEnabled: false,
                             resultHelpMessage: '',
                             promotions: [],
@@ -1948,9 +2175,6 @@
                 }
             }
             
-            // ============================================================
-            // UPDATE APP UI
-            // ============================================================
             function updateAppUI(data) {
                 if (!data) return;
                 
@@ -2000,9 +2224,6 @@
                 }
             }
             
-            // ============================================================
-            // ADMIN: POPULATE FIELDS
-            // ============================================================
             function populateAdminFields(data) {
                 if (!data) return;
                 document.getElementById('setAppName').value = data.appName || 'Board Result Guide';
@@ -2014,6 +2235,12 @@
                 document.getElementById('setFacebookLink').value = data.facebookLink || '';
                 document.getElementById('setTelegramGroup').value = data.telegramGroup || '';
                 document.getElementById('setTelegramChannel').value = data.telegramChannel || '';
+                document.getElementById('setChannelPopupEnabled').checked = data.channelPopupEnabled || false;
+                document.getElementById('setChannelPopupTitle').value = data.channelPopupTitle || 'আমাদের Telegram Channel-এ যোগ দিন!';
+                document.getElementById('setChannelPopupText').value = data.channelPopupText || 'SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে';
+                document.getElementById('setChannelPopupButton').value = data.channelPopupButton || '📢 Channel-এ যোগ দিন';
+                document.getElementById('setChannelPopupSkip').value = data.channelPopupSkip || '✕ পরে দেখবো';
+                document.getElementById('setChannelPopupIcon').value = data.channelPopupIcon || '📢';
                 document.getElementById('setResultHelpEnabled').checked = data.resultHelpEnabled || false;
                 document.getElementById('setResultHelpMessage').value = data.resultHelpMessage || '';
                 document.getElementById('setMonetagZone').value = data.monetagZoneId || '';
@@ -2021,9 +2248,6 @@
                 loadPromotionsUI(data.promotions || []);
             }
             
-            // ============================================================
-            // ADMIN: SAVE SETTINGS
-            // ============================================================
             window.saveAllSettings = async function() {
                 try {
                     const settings = {
@@ -2036,6 +2260,12 @@
                         facebookLink: document.getElementById('setFacebookLink').value || '',
                         telegramGroup: document.getElementById('setTelegramGroup').value || '',
                         telegramChannel: document.getElementById('setTelegramChannel').value || '',
+                        channelPopupEnabled: document.getElementById('setChannelPopupEnabled').checked,
+                        channelPopupTitle: document.getElementById('setChannelPopupTitle').value || 'আমাদের Telegram Channel-এ যোগ দিন!',
+                        channelPopupText: document.getElementById('setChannelPopupText').value || 'SSC ও HSC ফলাফল সম্পর্কে সর্বপ্রথম আপডেট পেতে',
+                        channelPopupButton: document.getElementById('setChannelPopupButton').value || '📢 Channel-এ যোগ দিন',
+                        channelPopupSkip: document.getElementById('setChannelPopupSkip').value || '✕ পরে দেখবো',
+                        channelPopupIcon: document.getElementById('setChannelPopupIcon').value || '📢',
                         resultHelpEnabled: document.getElementById('setResultHelpEnabled').checked,
                         resultHelpMessage: document.getElementById('setResultHelpMessage').value || '',
                         promotions: getPromotionsData(),
@@ -2058,9 +2288,6 @@
                 }
             };
             
-            // ============================================================
-            // ADMIN: LOGIN
-            // ============================================================
             window.handleAdminLogin = async function() {
                 const email = DOM.adminEmail.value.trim();
                 const password = DOM.adminPassword.value.trim();
@@ -2098,9 +2325,6 @@
                 }
             };
             
-            // ============================================================
-            // ADMIN: LOAD DATA
-            // ============================================================
             async function loadAdminData() {
                 try {
                     const usersSnap = await getDocs(collection(db, 'users'));
@@ -2148,9 +2372,6 @@
                 }
             }
             
-            // ============================================================
-            // ADMIN: SHOW SECTION
-            // ============================================================
             window.showAdminSection = function(section) {
                 document.querySelectorAll('#adminContent > div').forEach(el => el.style.display = 'none');
                 const target = document.getElementById(`admin-${section}`);
@@ -2164,9 +2385,6 @@
                 }
             };
             
-            // ============================================================
-            // NETWORK LISTENERS
-            // ============================================================
             function setupNetworkListeners() {
                 window.addEventListener('online', function() {
                     state.isOnline = true;
@@ -2181,9 +2399,6 @@
                 });
             }
             
-            // ============================================================
-            // EVENT LISTENERS
-            // ============================================================
             function setupEventListeners() {
                 document.querySelectorAll('.exam-btn').forEach(function(btn) {
                     btn.addEventListener('click', function() {
@@ -2223,7 +2438,9 @@
                 
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape') {
-                        if (DOM.confirmationModal.classList.contains('active')) {
+                        if (document.getElementById('channelPopup').classList.contains('active')) {
+                            closeChannelPopup();
+                        } else if (DOM.confirmationModal.classList.contains('active')) {
                             handleCancel();
                         } else if (DOM.guidelinePage.style.display !== 'none') {
                             handleBackButton();
@@ -2237,9 +2454,6 @@
                 });
             }
             
-            // ============================================================
-            // HANDLERS
-            // ============================================================
             function handleExamSelect(exam) {
                 if (!state.appReady || !state.isOnline) {
                     if (!state.isOnline) {
@@ -2387,9 +2601,6 @@
                 }
             }
             
-            // ============================================================
-            // RESULT TYPE SWITCHING
-            // ============================================================
             function switchResultType(type) {
                 if (state.resultType === type) return;
                 state.resultType = type;
@@ -2399,9 +2610,6 @@
                 TelegramModule.hapticFeedback('light');
             }
             
-            // ============================================================
-            // UI FUNCTIONS
-            // ============================================================
             function showHome() {
                 DOM.homePage.classList.add('active');
                 DOM.homePage.style.display = 'flex';
@@ -2520,9 +2728,6 @@
                 DOM.recoveryUI.style.display = 'none';
             }
             
-            // ============================================================
-            // START APP
-            // ============================================================
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initApp);
             } else {
