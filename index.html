@@ -174,7 +174,6 @@
             font-family: inherit;
             align-self: flex-start;
         }
-
         .visual-back-btn:active { transform: scale(0.95); }
         .visual-back-btn span { font-size: 18px; line-height: 1; }
 
@@ -236,6 +235,139 @@
                 color: #f3e5f5;
             }
         }
+
+        /* ===== AD SECTION ===== */
+        .ad-section {
+            display: none;
+            margin: 12px 0 16px 0;
+        }
+        .ad-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            border-radius: var(--radius);
+            padding: 20px 18px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 16px rgba(238, 90, 111, 0.3);
+            animation: adPulse 2s ease-in-out infinite;
+        }
+        @keyframes adPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+        .ad-card h4 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .ad-card p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        .ad-watch-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background: #ffffff;
+            color: #ee5a6f;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .ad-watch-btn:active { transform: scale(0.95); }
+        .ad-watch-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== REFERRAL SECTION ===== */
+        .referral-section {
+            display: none;
+            margin: 12px 0 16px 0;
+        }
+        .referral-card {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .referral-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .referral-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+        }
+        .referral-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+        }
+        .referral-text { flex: 1; }
+        .referral-text h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .referral-text p {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .referral-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #1a237e;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .referral-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: #ffc107;
+            color: #1a237e;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .referral-btn:active { transform: scale(0.97); }
 
         /* ===== PROMOTIONS CONTAINER ===== */
         .promotions-container {
@@ -405,7 +537,6 @@
             from { opacity: 0; backdrop-filter: blur(0); }
             to { opacity: 1; backdrop-filter: blur(6px); }
         }
-
         @keyframes popupSlideUp {
             from { opacity: 0; transform: translateY(40px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -423,7 +554,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .channel-popup-content::before {
             content: '';
             position: absolute;
@@ -435,24 +565,22 @@
             animation: pulse 3s ease-in-out infinite;
             pointer-events: none;
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.5; }
             50% { transform: scale(1.1); opacity: 0.8; }
         }
-
         .channel-popup-icon {
             font-size: 64px;
             display: block;
             margin-bottom: 16px;
             animation: bounce 2s ease infinite;
+            position: relative;
+            z-index: 1;
         }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
         }
-
         .channel-popup-title {
             font-size: 22px;
             font-weight: 700;
@@ -462,7 +590,6 @@
             position: relative;
             z-index: 1;
         }
-
         .channel-popup-text {
             font-size: 15px;
             color: rgba(255, 255, 255, 0.85);
@@ -471,7 +598,6 @@
             position: relative;
             z-index: 1;
         }
-
         .channel-popup-btn {
             display: flex;
             align-items: center;
@@ -494,8 +620,6 @@
             font-family: inherit;
         }
         .channel-popup-btn:active { transform: scale(0.97); }
-        .channel-popup-btn:hover { background: #ffca28; }
-
         .channel-popup-skip {
             background: transparent;
             color: rgba(255, 255, 255, 0.7);
@@ -510,7 +634,6 @@
             z-index: 1;
         }
         .channel-popup-skip:hover { color: #ffffff; }
-
         .channel-popup-sparkle {
             position: absolute;
             font-size: 20px;
@@ -522,7 +645,6 @@
         .channel-popup-sparkle.s2 { top: 25%; right: 12%; animation-delay: 1s; }
         .channel-popup-sparkle.s3 { bottom: 20%; left: 15%; animation-delay: 2s; }
         .channel-popup-sparkle.s4 { bottom: 30%; right: 10%; animation-delay: 1.5s; }
-
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
             50% { transform: translateY(-15px) rotate(15deg); opacity: 0.9; }
@@ -747,7 +869,6 @@
             border-top: 1px solid rgba(128, 128, 128, 0.08);
             border-bottom: 1px solid rgba(128, 128, 128, 0.08);
         }
-
         .guideline-extra-links .extra-link {
             display: inline-flex;
             align-items: center;
@@ -763,7 +884,6 @@
             border: none;
             font-family: inherit;
         }
-
         .guideline-extra-links .extra-link:active { transform: scale(0.95); }
         .guideline-extra-links .extra-link:hover { opacity: 0.8; }
 
@@ -948,7 +1068,7 @@
         }
 
         /* ================================================================
-           ADMIN PANEL (Full Page)
+           ADMIN PANEL
            ================================================================ */
         .admin-panel-container {
             position: fixed;
@@ -964,7 +1084,6 @@
             overflow-y: auto;
         }
         .admin-panel-container.active { display: flex; }
-
         .admin-panel-header {
             display: flex;
             justify-content: space-between;
@@ -1146,6 +1265,7 @@
             .admin-menu { grid-template-columns: 1fr 1fr; }
             .channel-popup-title { font-size: 18px; }
             .channel-popup-icon { font-size: 48px; }
+            .referral-content { flex-direction: column; text-align: center; }
         }
 
         @media (min-width: 600px) {
@@ -1203,6 +1323,33 @@
                         </div>
                         <span class="btn-arrow">→</span>
                     </button>
+                </div>
+
+                <!-- ===== AD SECTION (Monetag Rewarded) ===== -->
+                <div id="adSection" class="ad-section">
+                    <div class="ad-card">
+                        <h4>🎬 <span id="adTitle">Ad দেখুন</span></h4>
+                        <p id="adText">সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন</p>
+                        <button class="ad-watch-btn" onclick="watchMonetagAd()" id="adWatchBtn">
+                            ▶️ Ad দেখুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== REFERRAL SECTION (Monetag Referral) ===== -->
+                <div id="referralSection" class="referral-section">
+                    <div class="referral-card">
+                        <div class="referral-content">
+                            <span class="referral-icon">💰</span>
+                            <div class="referral-text">
+                                <h4 id="referralTitle">Monetag-এ যোগ দিন</h4>
+                                <p id="referralText">Referral = Rewards • Grow Your Income Today!</p>
+                                <button class="referral-btn" onclick="openReferralLink()" id="referralBtn">
+                                    🔥 Free Sign Up
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="promotionsContainer" class="promotions-container"></div>
@@ -1482,23 +1629,60 @@
                 </div>
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag Ad</h4>
+                
+                <div class="field-group checkbox-group">
+                    <label>Ad সেকশন Enable</label>
+                    <input type="checkbox" id="setAdEnabled">
+                </div>
+                <div class="field-group">
+                    <label>Monetag Zone ID</label>
+                    <input id="setMonetagZone" placeholder="11820178">
+                    <small style="font-size:11px;color:var(--tg-theme-hint-color);margin-top:4px;display:block;">Rewarded Interstitial Zone ID দিন</small>
+                </div>
+                <div class="field-group">
+                    <label>Ad Title</label>
+                    <input id="setAdTitle" placeholder="Ad দেখুন" value="Ad দেখুন">
+                </div>
+                <div class="field-group">
+                    <label>Ad Text</label>
+                    <input id="setAdText" placeholder="সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন" value="সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন">
+                </div>
+                <div class="field-group">
+                    <label>Ad Button Text</label>
+                    <input id="setAdButton" placeholder="▶️ Ad দেখুন" value="▶️ Ad দেখুন">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag Referral</h4>
+                
+                <div class="field-group checkbox-group">
+                    <label>Referral সেকশন Enable</label>
+                    <input type="checkbox" id="setReferralEnabled">
+                </div>
+                <div class="field-group">
+                    <label>Referral Link</label>
+                    <input id="setReferralLink" placeholder="https://monetag.com/?ref_id=XXXXX">
+                </div>
+                <div class="field-group">
+                    <label>Referral Title</label>
+                    <input id="setReferralTitle" placeholder="Monetag-এ যোগ দিন" value="Monetag-এ যোগ দিন">
+                </div>
+                <div class="field-group">
+                    <label>Referral Text</label>
+                    <input id="setReferralText" placeholder="Referral = Rewards • Grow Your Income Today!" value="Referral = Rewards • Grow Your Income Today!">
+                </div>
+                <div class="field-group">
+                    <label>Referral Button Text</label>
+                    <input id="setReferralButton" placeholder="🔥 Free Sign Up" value="🔥 Free Sign Up">
+                </div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                     <h4 style="font-size:14px;color:var(--tg-theme-text-color);">📢 Promotions (Multiple)</h4>
                     <button class="btn btn-success" onclick="addPromotion()" style="width:auto;padding:6px 16px;font-size:12px;margin:0;">➕ Add</button>
                 </div>
                 <div id="promotionsAdminContainer"></div>
-                
-                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
-                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag</h4>
-                
-                <div class="field-group">
-                    <label>Zone ID</label>
-                    <input id="setMonetagZone" placeholder="1234567890">
-                </div>
-                <div class="field-group">
-                    <label>Referral Link</label>
-                    <input id="setMonetagReferral" placeholder="https://monetag.com/ref/your-username">
-                </div>
                 
                 <button class="btn btn-success" onclick="saveAllSettings()">💾 সব সেটিংস সেভ করুন</button>
             </div>
@@ -1519,7 +1703,7 @@
             OFFICIAL_RESULT_URL: 'https://www.educationboardresults.gov.bd/',
             BOT_USERNAME: 'BoardResultGuideBot',
             MINI_APP_SHORT_NAME: 'result',
-            CHANNEL_POPUP_DELAY: 2000, // ২ সেকেন্ড
+            CHANNEL_POPUP_DELAY: 2000,
             
             SSC_STUDENT_STEPS: [
                 { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
@@ -1567,6 +1751,119 @@
                 { icon: '📄', title: 'প্রতিষ্ঠানের ফলাফল দেখুন', desc: 'আপনার প্রতিষ্ঠানের <strong>সামগ্রিক ফলাফল</strong> প্রদর্শিত হলে দেখে নিন।' },
                 { icon: '📱', title: 'ফলাফল সংরক্ষণ করুন', desc: 'প্রয়োজন হলে <strong>Screenshot</strong> অথবা Save/Print অপশন ব্যবহার করুন।' }
             ]
+        };
+
+        // ====================================================================
+        // MONETAG SDK LOADER (Dynamic)
+        // ====================================================================
+        let monetagCurrentZoneId = null;
+
+        function loadMonetagSDK(zoneId) {
+            if (!zoneId) {
+                console.log('⚠️ Monetag: Zone ID নেই');
+                return;
+            }
+            
+            // Same Zone ID হলে আবার লোড করবেন না
+            if (monetagCurrentZoneId === zoneId) {
+                console.log('✅ Monetag SDK already loaded for:', zoneId);
+                return;
+            }
+            
+            // পুরনো script সরান
+            const oldScripts = document.querySelectorAll('script[data-monetag-sdk]');
+            oldScripts.forEach(s => s.remove());
+            
+            console.log('🔄 Loading Monetag SDK for Zone:', zoneId);
+            
+            // নতুন script তৈরি করুন
+            const script = document.createElement('script');
+            script.src = 'https://monetag.com/vignettes/vignette.js';
+            script.setAttribute('data-zone', zoneId);
+            script.setAttribute('data-sdk', 'show_' + zoneId);
+            script.setAttribute('data-monetag-sdk', 'true');
+            
+            script.onload = function() {
+                monetagCurrentZoneId = zoneId;
+                console.log('✅ Monetag SDK Loaded:', zoneId);
+                console.log('✅ Function available:', typeof window['show_' + zoneId]);
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Monetag SDK Load Failed');
+                // Fallback: try old URL
+                const fallbackScript = document.createElement('script');
+                fallbackScript.src = 'https://libtl.com/sdk.js';
+                fallbackScript.setAttribute('data-zone', zoneId);
+                fallbackScript.setAttribute('data-sdk', 'show_' + zoneId);
+                fallbackScript.setAttribute('data-monetag-sdk', 'true');
+                fallbackScript.onload = function() {
+                    monetagCurrentZoneId = zoneId;
+                    console.log('✅ Monetag SDK Loaded (fallback):', zoneId);
+                };
+                document.head.appendChild(fallbackScript);
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        // ====================================================================
+        // WATCH MONETAG AD
+        // ====================================================================
+        window.watchMonetagAd = function() {
+            const zoneId = window.APP_STATE.appSettings?.monetagZoneId;
+            const btn = document.getElementById('adWatchBtn');
+            
+            if (!zoneId) {
+                TelegramModule.showAlert('⚠️ Ad Zone ID সেট করা নেই।');
+                return;
+            }
+            
+            const fnName = 'show_' + zoneId;
+            
+            if (typeof window[fnName] !== 'function') {
+                // SDK লোড করার চেষ্টা করুন
+                loadMonetagSDK(zoneId);
+                TelegramModule.showAlert('⏳ Ad লোড হচ্ছে... একটু পরে আবার চেষ্টা করুন।');
+                return;
+            }
+            
+            // Button disable
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ লোড হচ্ছে...';
+            }
+            
+            TelegramModule.hapticFeedback('medium');
+            
+            // Ad call
+            window[fnName]()
+                .then(() => {
+                    console.log('✅ Ad watched successfully');
+                    TelegramModule.hapticFeedback('success');
+                    TelegramModule.showAlert('✅ Ad দেখার জন্য ধন্যবাদ!');
+                })
+                .catch((error) => {
+                    console.error('❌ Ad error:', error);
+                    TelegramModule.hapticFeedback('error');
+                    TelegramModule.showAlert('❌ Ad দেখাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        const btnText = window.APP_STATE.appSettings?.adButton || '▶️ Ad দেখুন';
+                        btn.textContent = btnText;
+                    }
+                });
+        };
+
+        // ====================================================================
+        // OPEN REFERRAL LINK
+        // ====================================================================
+        window.openReferralLink = function() {
+            const link = window.APP_STATE.appSettings?.referralLink || 'https://monetag.com/';
+            TelegramModule.openUrl(link);
+            TelegramModule.hapticFeedback('light');
         };
 
         // ====================================================================
@@ -1727,11 +2024,12 @@
         window.APP_STATE = {
             appSettings: null,
             isTelegram: false,
-            channelPopupShown: false
+            channelPopupShown: false,
+            currentPage: 'home'
         };
 
         // ====================================================================
-        // GO BACK FUNCTION
+        // GO BACK
         // ====================================================================
         window.goBack = function() {
             var currentPage = window.APP_STATE.currentPage || 'home';
@@ -1746,7 +2044,7 @@
         };
 
         // ====================================================================
-        // CHANNEL POPUP FUNCTIONS
+        // CHANNEL POPUP
         // ====================================================================
         window.closeChannelPopup = function() {
             var popup = document.getElementById('channelPopup');
@@ -1770,16 +2068,12 @@
         };
 
         function showChannelPopup() {
-            // Already shown in this session?
             if (window.APP_STATE.channelPopupShown) return;
             
             var settings = window.APP_STATE.appSettings;
             if (!settings) return;
-            
-            // Check if enabled and channel link exists
             if (!settings.channelPopupEnabled || !settings.telegramChannel) return;
             
-            // Set popup content
             var iconEl = document.getElementById('channelPopupIcon');
             var titleEl = document.getElementById('channelPopupTitle');
             var textEl = document.getElementById('channelPopupText');
@@ -1792,7 +2086,6 @@
             if (btnEl) btnEl.textContent = settings.channelPopupButton || '📢 Channel-এ যোগ দিন';
             if (skipEl) skipEl.textContent = settings.channelPopupSkip || '✕ পরে দেখবো';
             
-            // Show popup after delay
             setTimeout(function() {
                 if (window.APP_STATE.channelPopupShown) return;
                 var popup = document.getElementById('channelPopup');
@@ -1805,7 +2098,7 @@
         }
 
         // ====================================================================
-        // GUIDELINE EXTRA FUNCTIONS
+        // EXTRA FUNCTIONS
         // ====================================================================
         function openTelegramGroup() {
             var link = window.APP_STATE.appSettings?.telegramGroup || 'https://t.me/your_group';
@@ -2004,6 +2297,14 @@
                 resultHelpSection: document.getElementById('resultHelpSection'),
                 helpText: document.getElementById('helpText'),
                 helpLink: document.getElementById('helpLink'),
+                adSection: document.getElementById('adSection'),
+                adTitle: document.getElementById('adTitle'),
+                adText: document.getElementById('adText'),
+                adWatchBtn: document.getElementById('adWatchBtn'),
+                referralSection: document.getElementById('referralSection'),
+                referralTitle: document.getElementById('referralTitle'),
+                referralText: document.getElementById('referralText'),
+                referralBtn: document.getElementById('referralBtn'),
                 adminLoginOverlay: document.getElementById('adminLoginOverlay'),
                 adminPanelContainer: document.getElementById('adminPanelContainer'),
                 adminEmail: document.getElementById('adminEmail'),
@@ -2062,7 +2363,11 @@
                     hideNetworkStateUI();
                     hideRecoveryUI();
                     
-                    // ✅ Show Channel Popup after delay
+                    // Load Monetag SDK if Zone ID exists
+                    if (state.appSettings?.monetagZoneId) {
+                        loadMonetagSDK(state.appSettings.monetagZoneId);
+                    }
+                    
                     showChannelPopup();
                     
                     console.log('[App] Initialized successfully');
@@ -2162,9 +2467,17 @@
                             channelPopupIcon: '📢',
                             resultHelpEnabled: false,
                             resultHelpMessage: '',
-                            promotions: [],
+                            adEnabled: false,
                             monetagZoneId: '',
-                            monetagReferralLink: ''
+                            adTitle: 'Ad দেখুন',
+                            adText: 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন',
+                            adButton: '▶️ Ad দেখুন',
+                            referralEnabled: false,
+                            referralLink: 'https://monetag.com/',
+                            referralTitle: 'Monetag-এ যোগ দিন',
+                            referralText: 'Referral = Rewards • Grow Your Income Today!',
+                            referralButton: '🔥 Free Sign Up',
+                            promotions: []
                         };
                         window.APP_STATE.appSettings = state.appSettings;
                         updateAppUI(state.appSettings);
@@ -2194,6 +2507,31 @@
                     }
                 }
                 
+                // ===== AD SECTION =====
+                if (DOM.adSection) {
+                    if (data.adEnabled && data.monetagZoneId) {
+                        DOM.adSection.style.display = 'block';
+                        if (DOM.adTitle) DOM.adTitle.textContent = data.adTitle || 'Ad দেখুন';
+                        if (DOM.adText) DOM.adText.textContent = data.adText || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন';
+                        if (DOM.adWatchBtn) DOM.adWatchBtn.textContent = data.adButton || '▶️ Ad দেখুন';
+                    } else {
+                        DOM.adSection.style.display = 'none';
+                    }
+                }
+                
+                // ===== REFERRAL SECTION =====
+                if (DOM.referralSection) {
+                    if (data.referralEnabled && data.referralLink) {
+                        DOM.referralSection.style.display = 'block';
+                        if (DOM.referralTitle) DOM.referralTitle.textContent = data.referralTitle || 'Monetag-এ যোগ দিন';
+                        if (DOM.referralText) DOM.referralText.textContent = data.referralText || 'Referral = Rewards • Grow Your Income Today!';
+                        if (DOM.referralBtn) DOM.referralBtn.textContent = data.referralButton || '🔥 Free Sign Up';
+                    } else {
+                        DOM.referralSection.style.display = 'none';
+                    }
+                }
+                
+                // ===== PROMOTIONS =====
                 if (DOM.promotionsContainer) {
                     DOM.promotionsContainer.innerHTML = '';
                     const promotions = data.promotions || [];
@@ -2215,6 +2553,7 @@
                     });
                 }
                 
+                // ===== RESULT HELP =====
                 if (data.resultHelpEnabled && data.telegramGroup) {
                     DOM.resultHelpSection.style.display = 'block';
                     DOM.helpText.textContent = data.resultHelpMessage || 'ফলাফল না পেলে আমাদের গ্রুপে যোগ দিন';
@@ -2243,8 +2582,16 @@
                 document.getElementById('setChannelPopupIcon').value = data.channelPopupIcon || '📢';
                 document.getElementById('setResultHelpEnabled').checked = data.resultHelpEnabled || false;
                 document.getElementById('setResultHelpMessage').value = data.resultHelpMessage || '';
+                document.getElementById('setAdEnabled').checked = data.adEnabled || false;
                 document.getElementById('setMonetagZone').value = data.monetagZoneId || '';
-                document.getElementById('setMonetagReferral').value = data.monetagReferralLink || '';
+                document.getElementById('setAdTitle').value = data.adTitle || 'Ad দেখুন';
+                document.getElementById('setAdText').value = data.adText || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন';
+                document.getElementById('setAdButton').value = data.adButton || '▶️ Ad দেখুন';
+                document.getElementById('setReferralEnabled').checked = data.referralEnabled || false;
+                document.getElementById('setReferralLink').value = data.referralLink || 'https://monetag.com/';
+                document.getElementById('setReferralTitle').value = data.referralTitle || 'Monetag-এ যোগ দিন';
+                document.getElementById('setReferralText').value = data.referralText || 'Referral = Rewards • Grow Your Income Today!';
+                document.getElementById('setReferralButton').value = data.referralButton || '🔥 Free Sign Up';
                 loadPromotionsUI(data.promotions || []);
             }
             
@@ -2268,9 +2615,17 @@
                         channelPopupIcon: document.getElementById('setChannelPopupIcon').value || '📢',
                         resultHelpEnabled: document.getElementById('setResultHelpEnabled').checked,
                         resultHelpMessage: document.getElementById('setResultHelpMessage').value || '',
+                        adEnabled: document.getElementById('setAdEnabled').checked,
+                        monetagZoneId: document.getElementById('setMonetagZone').value.trim() || '',
+                        adTitle: document.getElementById('setAdTitle').value || 'Ad দেখুন',
+                        adText: document.getElementById('setAdText').value || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন',
+                        adButton: document.getElementById('setAdButton').value || '▶️ Ad দেখুন',
+                        referralEnabled: document.getElementById('setReferralEnabled').checked,
+                        referralLink: document.getElementById('setReferralLink').value || '',
+                        referralTitle: document.getElementById('setReferralTitle').value || 'Monetag-এ যোগ দিন',
+                        referralText: document.getElementById('setReferralText').value || 'Referral = Rewards • Grow Your Income Today!',
+                        referralButton: document.getElementById('setReferralButton').value || '🔥 Free Sign Up',
                         promotions: getPromotionsData(),
-                        monetagZoneId: document.getElementById('setMonetagZone').value || '',
-                        monetagReferralLink: document.getElementById('setMonetagReferral').value || '',
                         updatedAt: new Date().toISOString()
                     };
                     
@@ -2280,6 +2635,12 @@
                     state.appSettings = settings;
                     window.APP_STATE.appSettings = settings;
                     updateAppUI(settings);
+                    
+                    // Load Monetag SDK with new Zone ID
+                    if (settings.monetagZoneId) {
+                        loadMonetagSDK(settings.monetagZoneId);
+                    }
+                    
                     showToast('✅ সব সেটিংস সেভ হয়েছে!');
                     
                 } catch (error) {
