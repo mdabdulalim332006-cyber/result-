@@ -209,6 +209,9 @@
         }
         .exam-btn:active { transform: scale(0.97); }
         .exam-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .exam-btn.loading { pointer-events: none; opacity: 0.7; }
+        .exam-btn.loading .btn-arrow { animation: spinArrow 1s linear infinite; }
+        @keyframes spinArrow { to { transform: rotate(360deg); } }
         .exam-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
         .exam-btn .btn-content { flex: 1; }
         .exam-btn .btn-title { font-size: 17px; font-weight: 600; display: block; }
@@ -234,63 +237,6 @@
                 background: linear-gradient(135deg, #311b92 0%, #4a148c 100%);
                 color: #f3e5f5;
             }
-        }
-
-        /* ===== AD SECTION ===== */
-        .ad-section {
-            display: none;
-            margin: 12px 0 16px 0;
-        }
-        .ad-card {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-            border-radius: var(--radius);
-            padding: 20px 18px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 16px rgba(238, 90, 111, 0.3);
-            animation: adPulse 2s ease-in-out infinite;
-        }
-        @keyframes adPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.01); }
-        }
-        .ad-card h4 {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .ad-card p {
-            font-size: 13px;
-            opacity: 0.9;
-            margin-bottom: 14px;
-            line-height: 1.5;
-        }
-        .ad-watch-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 32px;
-            background: #ffffff;
-            color: #ee5a6f;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all var(--transition);
-            font-family: inherit;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .ad-watch-btn:active { transform: scale(0.95); }
-        .ad-watch-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
         }
 
         /* ===== REFERRAL SECTION ===== */
@@ -324,10 +270,7 @@
             position: relative;
             z-index: 1;
         }
-        .referral-icon {
-            font-size: 36px;
-            flex-shrink: 0;
-        }
+        .referral-icon { font-size: 36px; flex-shrink: 0; }
         .referral-text { flex: 1; }
         .referral-text h4 {
             font-size: 16px;
@@ -339,15 +282,7 @@
             opacity: 0.85;
             margin-bottom: 8px;
             line-height: 1.4;
-        }
-        .referral-badge {
-            display: inline-block;
-            background: #ffc107;
-            color: #1a237e;
-            padding: 3px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
+            white-space: pre-line;
         }
         .referral-btn {
             display: inline-flex;
@@ -1280,7 +1215,6 @@
     </style>
 </head>
 <body>
-    <!-- ===== APP CONTAINER ===== -->
     <div id="app" class="app-container">
         <!-- HEADER -->
         <header class="app-header">
@@ -1307,7 +1241,7 @@
                 </div>
 
                 <div class="exam-selector">
-                    <button class="exam-btn ssc-btn" data-exam="ssc" aria-label="SSC Result দেখুন">
+                    <button class="exam-btn ssc-btn" data-exam="ssc" aria-label="SSC Result দেখুন" id="sscBtn">
                         <span class="btn-icon">🎓</span>
                         <div class="btn-content">
                             <span class="btn-title">SSC Result</span>
@@ -1315,7 +1249,7 @@
                         </div>
                         <span class="btn-arrow">→</span>
                     </button>
-                    <button class="exam-btn hsc-btn" data-exam="hsc" aria-label="HSC Result দেখুন">
+                    <button class="exam-btn hsc-btn" data-exam="hsc" aria-label="HSC Result দেখুন" id="hscBtn">
                         <span class="btn-icon">🎓</span>
                         <div class="btn-content">
                             <span class="btn-title">HSC Result</span>
@@ -1325,18 +1259,7 @@
                     </button>
                 </div>
 
-                <!-- ===== AD SECTION (Monetag Rewarded) ===== -->
-                <div id="adSection" class="ad-section">
-                    <div class="ad-card">
-                        <h4>🎬 <span id="adTitle">Ad দেখুন</span></h4>
-                        <p id="adText">সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন</p>
-                        <button class="ad-watch-btn" onclick="watchMonetagAd()" id="adWatchBtn">
-                            ▶️ Ad দেখুন
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ===== REFERRAL SECTION (Monetag Referral) ===== -->
+                <!-- REFERRAL SECTION -->
                 <div id="referralSection" class="referral-section">
                     <div class="referral-card">
                         <div class="referral-content">
@@ -1473,7 +1396,7 @@
     <!-- SHARE TOAST -->
     <div id="shareToast" class="share-toast">📋 লিংক কপি হয়েছে!</div>
 
-    <!-- ===== CHANNEL POPUP ===== -->
+    <!-- CHANNEL POPUP -->
     <div id="channelPopup" class="channel-popup-overlay">
         <div class="channel-popup-content">
             <span class="channel-popup-sparkle s1">✨</span>
@@ -1629,28 +1552,16 @@
                 </div>
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
-                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag Ad</h4>
+                <h4 style="font-size:14px;color:var(--tg-theme-text-color);margin-bottom:8px;">💰 Monetag Ad (SSC/HSC ক্লিকে দেখাবে)</h4>
                 
                 <div class="field-group checkbox-group">
-                    <label>Ad সেকশন Enable</label>
+                    <label>Ad Enable করুন</label>
                     <input type="checkbox" id="setAdEnabled">
                 </div>
                 <div class="field-group">
                     <label>Monetag Zone ID</label>
                     <input id="setMonetagZone" placeholder="11820178">
                     <small style="font-size:11px;color:var(--tg-theme-hint-color);margin-top:4px;display:block;">Rewarded Interstitial Zone ID দিন</small>
-                </div>
-                <div class="field-group">
-                    <label>Ad Title</label>
-                    <input id="setAdTitle" placeholder="Ad দেখুন" value="Ad দেখুন">
-                </div>
-                <div class="field-group">
-                    <label>Ad Text</label>
-                    <input id="setAdText" placeholder="সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন" value="সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন">
-                </div>
-                <div class="field-group">
-                    <label>Ad Button Text</label>
-                    <input id="setAdButton" placeholder="▶️ Ad দেখুন" value="▶️ Ad দেখুন">
                 </div>
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
@@ -1662,19 +1573,19 @@
                 </div>
                 <div class="field-group">
                     <label>Referral Link</label>
-                    <input id="setReferralLink" placeholder="https://monetag.com/?ref_id=XXXXX">
+                    <input id="setReferralLink" placeholder="https://monetag.com/?ref_id=zEBU">
                 </div>
                 <div class="field-group">
                     <label>Referral Title</label>
-                    <input id="setReferralTitle" placeholder="Monetag-এ যোগ দিন" value="Monetag-এ যোগ দিন">
+                    <input id="setReferralTitle" placeholder="💰 পড়াশোনার পাশাপাশি আয় করুন">
                 </div>
                 <div class="field-group">
                     <label>Referral Text</label>
-                    <input id="setReferralText" placeholder="Referral = Rewards • Grow Your Income Today!" value="Referral = Rewards • Grow Your Income Today!">
+                    <textarea id="setReferralText" placeholder="ছাত্র-ছাত্রীদের জন্য সহজ ইনকাম..."></textarea>
                 </div>
                 <div class="field-group">
                     <label>Referral Button Text</label>
-                    <input id="setReferralButton" placeholder="🔥 Free Sign Up" value="🔥 Free Sign Up">
+                    <input id="setReferralButton" placeholder="🔥 ফ্রি সাইনআপ করুন">
                 </div>
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
@@ -1704,6 +1615,7 @@
             BOT_USERNAME: 'BoardResultGuideBot',
             MINI_APP_SHORT_NAME: 'result',
             CHANNEL_POPUP_DELAY: 2000,
+            AD_TIMEOUT: 8000,
             
             SSC_STUDENT_STEPS: [
                 { icon: '🌐', title: 'সরকারি Result Website খুলুন', desc: 'আমাদের অ্যাপ থেকে সরাসরি সরকারি ওয়েবসাইটে যান।' },
@@ -1754,52 +1666,66 @@
         };
 
         // ====================================================================
-        // MONETAG SDK LOADER (Dynamic)
+        // MONETAG SDK LOADER
         // ====================================================================
         let monetagCurrentZoneId = null;
+        let monetagSDKReady = false;
 
-        function loadMonetagSDK(zoneId) {
+        function loadMonetagSDK(zoneId, callback) {
             if (!zoneId) {
                 console.log('⚠️ Monetag: Zone ID নেই');
+                if (callback) callback(false);
                 return;
             }
             
-            // Same Zone ID হলে আবার লোড করবেন না
-            if (monetagCurrentZoneId === zoneId) {
+            var fnName = 'show_' + zoneId;
+            
+            if (typeof window[fnName] === 'function' && monetagCurrentZoneId === zoneId) {
                 console.log('✅ Monetag SDK already loaded for:', zoneId);
+                monetagSDKReady = true;
+                if (callback) callback(true);
                 return;
             }
             
-            // পুরনো script সরান
+            // Remove old scripts
             const oldScripts = document.querySelectorAll('script[data-monetag-sdk]');
             oldScripts.forEach(s => s.remove());
             
+            monetagSDKReady = false;
             console.log('🔄 Loading Monetag SDK for Zone:', zoneId);
             
-            // নতুন script তৈরি করুন
             const script = document.createElement('script');
             script.src = 'https://monetag.com/vignettes/vignette.js';
             script.setAttribute('data-zone', zoneId);
             script.setAttribute('data-sdk', 'show_' + zoneId);
             script.setAttribute('data-monetag-sdk', 'true');
+            script.async = true;
             
             script.onload = function() {
                 monetagCurrentZoneId = zoneId;
+                monetagSDKReady = true;
                 console.log('✅ Monetag SDK Loaded:', zoneId);
                 console.log('✅ Function available:', typeof window['show_' + zoneId]);
+                if (callback) callback(true);
             };
             
             script.onerror = function() {
-                console.error('❌ Monetag SDK Load Failed');
-                // Fallback: try old URL
-                const fallbackScript = document.createElement('script');
+                console.error('❌ Monetag SDK Load Failed - trying fallback');
+                var fallbackScript = document.createElement('script');
                 fallbackScript.src = 'https://libtl.com/sdk.js';
                 fallbackScript.setAttribute('data-zone', zoneId);
                 fallbackScript.setAttribute('data-sdk', 'show_' + zoneId);
                 fallbackScript.setAttribute('data-monetag-sdk', 'true');
+                fallbackScript.async = true;
                 fallbackScript.onload = function() {
                     monetagCurrentZoneId = zoneId;
+                    monetagSDKReady = true;
                     console.log('✅ Monetag SDK Loaded (fallback):', zoneId);
+                    if (callback) callback(true);
+                };
+                fallbackScript.onerror = function() {
+                    console.error('❌ Monetag SDK fallback also failed');
+                    if (callback) callback(false);
                 };
                 document.head.appendChild(fallbackScript);
             };
@@ -1808,60 +1734,17 @@
         }
 
         // ====================================================================
-        // WATCH MONETAG AD
-        // ====================================================================
-        window.watchMonetagAd = function() {
-            const zoneId = window.APP_STATE.appSettings?.monetagZoneId;
-            const btn = document.getElementById('adWatchBtn');
-            
-            if (!zoneId) {
-                TelegramModule.showAlert('⚠️ Ad Zone ID সেট করা নেই।');
-                return;
-            }
-            
-            const fnName = 'show_' + zoneId;
-            
-            if (typeof window[fnName] !== 'function') {
-                // SDK লোড করার চেষ্টা করুন
-                loadMonetagSDK(zoneId);
-                TelegramModule.showAlert('⏳ Ad লোড হচ্ছে... একটু পরে আবার চেষ্টা করুন।');
-                return;
-            }
-            
-            // Button disable
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '⏳ লোড হচ্ছে...';
-            }
-            
-            TelegramModule.hapticFeedback('medium');
-            
-            // Ad call
-            window[fnName]()
-                .then(() => {
-                    console.log('✅ Ad watched successfully');
-                    TelegramModule.hapticFeedback('success');
-                    TelegramModule.showAlert('✅ Ad দেখার জন্য ধন্যবাদ!');
-                })
-                .catch((error) => {
-                    console.error('❌ Ad error:', error);
-                    TelegramModule.hapticFeedback('error');
-                    TelegramModule.showAlert('❌ Ad দেখাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
-                })
-                .finally(() => {
-                    if (btn) {
-                        btn.disabled = false;
-                        const btnText = window.APP_STATE.appSettings?.adButton || '▶️ Ad দেখুন';
-                        btn.textContent = btnText;
-                    }
-                });
-        };
-
-        // ====================================================================
         // OPEN REFERRAL LINK
         // ====================================================================
         window.openReferralLink = function() {
-            const link = window.APP_STATE.appSettings?.referralLink || 'https://monetag.com/';
+            var link = window.APP_STATE.appSettings?.referralLink;
+            
+            if (!link || link.trim() === '' || link.includes('github.io')) {
+                link = 'https://monetag.com/?ref_id=zEBU';
+                console.log('⚠️ Using default referral link:', link);
+            }
+            
+            console.log('🔗 Opening referral:', link);
             TelegramModule.openUrl(link);
             TelegramModule.hapticFeedback('light');
         };
@@ -2265,7 +2148,8 @@
                 isInitializing: false,
                 appSettings: null,
                 isAdmin: false,
-                adminClickCount: 0
+                adminClickCount: 0,
+                isProcessingClick: false
             };
             
             var DOM = {
@@ -2297,14 +2181,12 @@
                 resultHelpSection: document.getElementById('resultHelpSection'),
                 helpText: document.getElementById('helpText'),
                 helpLink: document.getElementById('helpLink'),
-                adSection: document.getElementById('adSection'),
-                adTitle: document.getElementById('adTitle'),
-                adText: document.getElementById('adText'),
-                adWatchBtn: document.getElementById('adWatchBtn'),
                 referralSection: document.getElementById('referralSection'),
                 referralTitle: document.getElementById('referralTitle'),
                 referralText: document.getElementById('referralText'),
                 referralBtn: document.getElementById('referralBtn'),
+                sscBtn: document.getElementById('sscBtn'),
+                hscBtn: document.getElementById('hscBtn'),
                 adminLoginOverlay: document.getElementById('adminLoginOverlay'),
                 adminPanelContainer: document.getElementById('adminPanelContainer'),
                 adminEmail: document.getElementById('adminEmail'),
@@ -2469,14 +2351,11 @@
                             resultHelpMessage: '',
                             adEnabled: false,
                             monetagZoneId: '',
-                            adTitle: 'Ad দেখুন',
-                            adText: 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন',
-                            adButton: '▶️ Ad দেখুন',
                             referralEnabled: false,
-                            referralLink: 'https://monetag.com/',
-                            referralTitle: 'Monetag-এ যোগ দিন',
-                            referralText: 'Referral = Rewards • Grow Your Income Today!',
-                            referralButton: '🔥 Free Sign Up',
+                            referralLink: 'https://monetag.com/?ref_id=zEBU',
+                            referralTitle: '💰 পড়াশোনার পাশাপাশি আয় করুন',
+                            referralText: 'ছাত্র-ছাত্রীদের জন্য সহজ ইনকামের সুযোগ! নিজের ব্লগ, ইউটিউব বা অ্যাপ থেকে ঘরে বসেই আয় করতে পারবেন।',
+                            referralButton: '🔥 ফ্রি সাইনআপ করুন',
                             promotions: []
                         };
                         window.APP_STATE.appSettings = state.appSettings;
@@ -2507,25 +2386,13 @@
                     }
                 }
                 
-                // ===== AD SECTION =====
-                if (DOM.adSection) {
-                    if (data.adEnabled && data.monetagZoneId) {
-                        DOM.adSection.style.display = 'block';
-                        if (DOM.adTitle) DOM.adTitle.textContent = data.adTitle || 'Ad দেখুন';
-                        if (DOM.adText) DOM.adText.textContent = data.adText || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন';
-                        if (DOM.adWatchBtn) DOM.adWatchBtn.textContent = data.adButton || '▶️ Ad দেখুন';
-                    } else {
-                        DOM.adSection.style.display = 'none';
-                    }
-                }
-                
                 // ===== REFERRAL SECTION =====
                 if (DOM.referralSection) {
                     if (data.referralEnabled && data.referralLink) {
                         DOM.referralSection.style.display = 'block';
-                        if (DOM.referralTitle) DOM.referralTitle.textContent = data.referralTitle || 'Monetag-এ যোগ দিন';
-                        if (DOM.referralText) DOM.referralText.textContent = data.referralText || 'Referral = Rewards • Grow Your Income Today!';
-                        if (DOM.referralBtn) DOM.referralBtn.textContent = data.referralButton || '🔥 Free Sign Up';
+                        if (DOM.referralTitle) DOM.referralTitle.textContent = data.referralTitle || '💰 পড়াশোনার পাশাপাশি আয় করুন';
+                        if (DOM.referralText) DOM.referralText.textContent = data.referralText || 'ছাত্র-ছাত্রীদের জন্য সহজ ইনকাম';
+                        if (DOM.referralBtn) DOM.referralBtn.textContent = data.referralButton || '🔥 ফ্রি সাইনআপ করুন';
                     } else {
                         DOM.referralSection.style.display = 'none';
                     }
@@ -2584,14 +2451,11 @@
                 document.getElementById('setResultHelpMessage').value = data.resultHelpMessage || '';
                 document.getElementById('setAdEnabled').checked = data.adEnabled || false;
                 document.getElementById('setMonetagZone').value = data.monetagZoneId || '';
-                document.getElementById('setAdTitle').value = data.adTitle || 'Ad দেখুন';
-                document.getElementById('setAdText').value = data.adText || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন';
-                document.getElementById('setAdButton').value = data.adButton || '▶️ Ad দেখুন';
                 document.getElementById('setReferralEnabled').checked = data.referralEnabled || false;
-                document.getElementById('setReferralLink').value = data.referralLink || 'https://monetag.com/';
-                document.getElementById('setReferralTitle').value = data.referralTitle || 'Monetag-এ যোগ দিন';
-                document.getElementById('setReferralText').value = data.referralText || 'Referral = Rewards • Grow Your Income Today!';
-                document.getElementById('setReferralButton').value = data.referralButton || '🔥 Free Sign Up';
+                document.getElementById('setReferralLink').value = data.referralLink || 'https://monetag.com/?ref_id=zEBU';
+                document.getElementById('setReferralTitle').value = data.referralTitle || '💰 পড়াশোনার পাশাপাশি আয় করুন';
+                document.getElementById('setReferralText').value = data.referralText || 'ছাত্র-ছাত্রীদের জন্য সহজ ইনকামের সুযোগ!';
+                document.getElementById('setReferralButton').value = data.referralButton || '🔥 ফ্রি সাইনআপ করুন';
                 loadPromotionsUI(data.promotions || []);
             }
             
@@ -2617,14 +2481,11 @@
                         resultHelpMessage: document.getElementById('setResultHelpMessage').value || '',
                         adEnabled: document.getElementById('setAdEnabled').checked,
                         monetagZoneId: document.getElementById('setMonetagZone').value.trim() || '',
-                        adTitle: document.getElementById('setAdTitle').value || 'Ad দেখুন',
-                        adText: document.getElementById('setAdText').value || 'সংক্ষিপ্ত একটি Ad দেখে আমাদের Support করুন',
-                        adButton: document.getElementById('setAdButton').value || '▶️ Ad দেখুন',
                         referralEnabled: document.getElementById('setReferralEnabled').checked,
                         referralLink: document.getElementById('setReferralLink').value || '',
-                        referralTitle: document.getElementById('setReferralTitle').value || 'Monetag-এ যোগ দিন',
-                        referralText: document.getElementById('setReferralText').value || 'Referral = Rewards • Grow Your Income Today!',
-                        referralButton: document.getElementById('setReferralButton').value || '🔥 Free Sign Up',
+                        referralTitle: document.getElementById('setReferralTitle').value || '💰 পড়াশোনার পাশাপাশি আয় করুন',
+                        referralText: document.getElementById('setReferralText').value || '',
+                        referralButton: document.getElementById('setReferralButton').value || '🔥 ফ্রি সাইনআপ করুন',
                         promotions: getPromotionsData(),
                         updatedAt: new Date().toISOString()
                     };
@@ -2815,17 +2676,119 @@
                 });
             }
             
+            // ============================================================
+            // HANDLE EXAM SELECT — WITH AD SHOW
+            // ============================================================
             function handleExamSelect(exam) {
+                if (state.isProcessingClick) return;
                 if (!state.appReady || !state.isOnline) {
                     if (!state.isOnline) {
                         TelegramModule.showAlert('ইন্টারনেট সংযোগ নেই। সংযোগ চালু করে আবার চেষ্টা করুন।');
                     }
                     return;
                 }
+                
+                state.isProcessingClick = true;
                 state.selectedExam = exam;
                 state.resultType = 'student';
-                showModal();
+                
                 TelegramModule.hapticFeedback('light');
+                
+                var adEnabled = state.appSettings?.adEnabled && state.appSettings?.monetagZoneId;
+                
+                if (!adEnabled) {
+                    state.isProcessingClick = false;
+                    showModal();
+                    return;
+                }
+                
+                var zoneId = state.appSettings.monetagZoneId;
+                var fnName = 'show_' + zoneId;
+                
+                if (typeof window[fnName] !== 'function') {
+                    console.log('⚠️ Monetag SDK not ready, loading...');
+                    showLoading('⏳ Ad লোড হচ্ছে...');
+                    
+                    loadMonetagSDK(zoneId, function(success) {
+                        hideLoading();
+                        if (success && typeof window[fnName] === 'function') {
+                            playAdAndShowModal(zoneId, fnName);
+                        } else {
+                            console.log('⚠️ Ad SDK failed to load, skipping ad');
+                            state.isProcessingClick = false;
+                            showModal();
+                        }
+                    });
+                    return;
+                }
+                
+                playAdAndShowModal(zoneId, fnName);
+            }
+            
+            function playAdAndShowModal(zoneId, fnName) {
+                console.log('🎬 Playing ad...');
+                showLoading('🎬 Ad দেখুন...');
+                
+                var adCompleted = false;
+                var adTimeout = setTimeout(function() {
+                    if (!adCompleted) {
+                        adCompleted = true;
+                        console.log('⚠️ Ad timeout — proceeding to modal');
+                        hideLoading();
+                        state.isProcessingClick = false;
+                        showModal();
+                    }
+                }, APP_CONFIG.AD_TIMEOUT);
+                
+                try {
+                    var adPromise = window[fnName]();
+                    
+                    if (adPromise && typeof adPromise.then === 'function') {
+                        adPromise
+                            .then(function() {
+                                if (adCompleted) return;
+                                adCompleted = true;
+                                clearTimeout(adTimeout);
+                                console.log('✅ Ad watched successfully');
+                                TelegramModule.hapticFeedback('success');
+                                hideLoading();
+                                state.isProcessingClick = false;
+                                setTimeout(function() {
+                                    showModal();
+                                }, 300);
+                            })
+                            .catch(function(error) {
+                                if (adCompleted) return;
+                                adCompleted = true;
+                                clearTimeout(adTimeout);
+                                console.error('❌ Ad error:', error);
+                                TelegramModule.hapticFeedback('error');
+                                hideLoading();
+                                state.isProcessingClick = false;
+                                showModal();
+                            });
+                    } else {
+                        // Not a promise — assume success
+                        setTimeout(function() {
+                            if (!adCompleted) {
+                                adCompleted = true;
+                                clearTimeout(adTimeout);
+                                hideLoading();
+                                state.isProcessingClick = false;
+                                showModal();
+                            }
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('❌ Ad exception:', error);
+                    if (!adCompleted) {
+                        adCompleted = true;
+                        clearTimeout(adTimeout);
+                        hideLoading();
+                        state.isProcessingClick = false;
+                        showModal();
+                    }
+                }
             }
             
             function handleContinue() {
