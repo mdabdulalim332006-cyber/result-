@@ -239,6 +239,141 @@
             }
         }
 
+        /* ===== BOOKS SECTION ===== */
+        .books-section {
+            display: none;
+            margin: 16px 0;
+        }
+        .books-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .books-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 4px;
+        }
+        .books-header p {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .books-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .book-card {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: var(--radius);
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            position: relative;
+            transition: all var(--transition);
+        }
+        .book-card:active { transform: scale(0.98); }
+
+        .book-cover {
+            width: 70px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+        }
+
+        .book-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+        }
+
+        .book-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color);
+            margin-bottom: 4px;
+        }
+
+        .book-rating {
+            font-size: 11px;
+            color: #ffc107;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .book-price-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .book-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #4caf50;
+        }
+
+        .book-price-original {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+            text-decoration: line-through;
+        }
+
+        .book-buy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+            align-self: flex-start;
+            box-shadow: 0 3px 10px rgba(238, 90, 111, 0.3);
+        }
+        .book-buy-btn:active { transform: scale(0.95); }
+
+        .book-badge {
+            position: absolute;
+            top: -6px;
+            right: 10px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+        .book-badge.bestseller { background: #ff6b6b; }
+        .book-badge.new { background: #4caf50; }
+        .book-badge.discount { background: #ff9800; }
+
         /* ===== REFERRAL SECTION ===== */
         .referral-section {
             display: none;
@@ -1178,7 +1313,8 @@
             color: var(--tg-theme-text-color);
         }
 
-        .promotion-item {
+        .promotion-item,
+        .book-item {
             background: var(--tg-theme-bg-color);
             border-radius: 8px;
             padding: 12px;
@@ -1257,6 +1393,15 @@
                         </div>
                         <span class="btn-arrow">→</span>
                     </button>
+                </div>
+
+                <!-- ===== BOOKS SECTION ===== -->
+                <div id="booksSection" class="books-section">
+                    <div class="books-header">
+                        <h3 id="booksTitle">📚 প্রস্তুতির সেরা বই</h3>
+                        <p id="booksSubtitle">SSC/HSC ও ভর্তি পরীক্ষার জন্য</p>
+                    </div>
+                    <div class="books-list" id="booksList"></div>
                 </div>
 
                 <!-- REFERRAL SECTION -->
@@ -1590,12 +1735,36 @@
                 
                 <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <h4 style="font-size:14px;color:var(--tg-theme-text-color);">📚 Books Section</h4>
+                </div>
+                
+                <div class="field-group checkbox-group">
+                    <label>Books Section Enable</label>
+                    <input type="checkbox" id="setBooksEnabled">
+                </div>
+                <div class="field-group">
+                    <label>Section Title</label>
+                    <input id="setBooksTitle" placeholder="📚 প্রস্তুতির সেরা বই">
+                </div>
+                <div class="field-group">
+                    <label>Section Subtitle</label>
+                    <input id="setBooksSubtitle" placeholder="SSC/HSC ও ভর্তি পরীক্ষার জন্য">
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0;">
+                    <span style="font-size:13px;color:var(--tg-theme-hint-color);">Books List</span>
+                    <button class="btn btn-success" onclick="addBook()" style="width:auto;padding:6px 16px;font-size:12px;margin:0;">➕ Add Book</button>
+                </div>
+                <div id="booksAdminContainer"></div>
+                
+                <div style="border-top:1px solid rgba(128,128,128,0.1);margin:10px 0;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                     <h4 style="font-size:14px;color:var(--tg-theme-text-color);">📢 Promotions (Multiple)</h4>
                     <button class="btn btn-success" onclick="addPromotion()" style="width:auto;padding:6px 16px;font-size:12px;margin:0;">➕ Add</button>
                 </div>
                 <div id="promotionsAdminContainer"></div>
                 
-                <button class="btn btn-success" onclick="saveAllSettings()">💾 সব সেটিংস সেভ করুন</button>
+                <button class="btn btn-success" onclick="saveAllSettings()" style="margin-top:16px;">💾 সব সেটিংস সেভ করুন</button>
             </div>
 
             <!-- Users -->
@@ -1687,7 +1856,6 @@
                 return;
             }
             
-            // Remove old scripts
             const oldScripts = document.querySelectorAll('script[data-monetag-sdk]');
             oldScripts.forEach(s => s.remove());
             
@@ -1705,7 +1873,6 @@
                 monetagCurrentZoneId = zoneId;
                 monetagSDKReady = true;
                 console.log('✅ Monetag SDK Loaded:', zoneId);
-                console.log('✅ Function available:', typeof window['show_' + zoneId]);
                 if (callback) callback(true);
             };
             
@@ -1747,6 +1914,19 @@
             console.log('🔗 Opening referral:', link);
             TelegramModule.openUrl(link);
             TelegramModule.hapticFeedback('light');
+        };
+
+        // ====================================================================
+        // BUY BOOK
+        // ====================================================================
+        window.buyBook = function(link) {
+            if (!link) {
+                TelegramModule.showAlert('⚠️ Link পাওয়া যায়নি');
+                return;
+            }
+            console.log('🛒 Opening book link:', link);
+            TelegramModule.openUrl(link);
+            TelegramModule.hapticFeedback('medium');
         };
 
         // ====================================================================
@@ -2020,6 +2200,152 @@
         }
 
         // ====================================================================
+        // BOOKS MANAGEMENT
+        // ====================================================================
+        function addBook() {
+            const container = document.getElementById('booksAdminContainer');
+            const id = 'book_' + Date.now();
+            
+            const html = `
+                <div class="book-item" data-id="${id}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span style="font-weight:600;font-size:13px;color:var(--tg-theme-text-color);">📚 Book</span>
+                        <button onclick="removeBook('${id}')" style="background:#f44336;color:white;border:none;border-radius:4px;padding:2px 10px;font-size:12px;cursor:pointer;">✕</button>
+                    </div>
+                    <div class="field-group checkbox-group">
+                        <label>Enable</label>
+                        <input type="checkbox" class="book-enabled" data-id="${id}" checked>
+                    </div>
+                    <div class="field-group">
+                        <label>📖 Book Name</label>
+                        <input class="book-name" data-id="${id}" placeholder="SSC বাংলা সাহিত্য">
+                    </div>
+                    <div class="field-group">
+                        <label>✍️ Author</label>
+                        <input class="book-author" data-id="${id}" placeholder="লেখকের নাম">
+                    </div>
+                    <div class="field-group">
+                        <label>🖼️ Cover Image URL</label>
+                        <input class="book-cover" data-id="${id}" placeholder="https://example.com/book.jpg">
+                    </div>
+                    <div class="field-group">
+                        <label>💰 Price (৳)</label>
+                        <input class="book-price" data-id="${id}" placeholder="250" type="number">
+                    </div>
+                    <div class="field-group">
+                        <label>💸 Original Price (৳) - ঐচ্ছিক</label>
+                        <input class="book-original-price" data-id="${id}" placeholder="350" type="number">
+                    </div>
+                    <div class="field-group">
+                        <label>⭐ Rating (1-5)</label>
+                        <input class="book-rating" data-id="${id}" placeholder="5" type="number" min="1" max="5" value="5">
+                    </div>
+                    <div class="field-group">
+                        <label>🏷️ Badge (ঐচ্ছিক)</label>
+                        <input class="book-badge-text" data-id="${id}" placeholder="Best Seller / New / Discount">
+                    </div>
+                    <div class="field-group">
+                        <label>🔗 Affiliate Link</label>
+                        <input class="book-link" data-id="${id}" placeholder="https://rokomari.com/book/xxxxx?ref=your_id">
+                    </div>
+                    <div class="field-group">
+                        <label>🔘 Button Text</label>
+                        <input class="book-button" data-id="${id}" placeholder="🛒 কিনুন" value="🛒 কিনুন">
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeBook(id) {
+            const el = document.querySelector(`.book-item[data-id="${id}"]`);
+            if (el) el.remove();
+        }
+
+        function getBooksData() {
+            const items = document.querySelectorAll('#booksAdminContainer .book-item');
+            const books = [];
+            items.forEach(el => {
+                const id = el.dataset.id;
+                books.push({
+                    id: id,
+                    enabled: el.querySelector('.book-enabled').checked,
+                    name: el.querySelector('.book-name').value || '',
+                    author: el.querySelector('.book-author').value || '',
+                    cover: el.querySelector('.book-cover').value || '',
+                    price: el.querySelector('.book-price').value || '',
+                    originalPrice: el.querySelector('.book-original-price').value || '',
+                    rating: el.querySelector('.book-rating').value || '5',
+                    badge: el.querySelector('.book-badge-text').value || '',
+                    link: el.querySelector('.book-link').value || '',
+                    buttonText: el.querySelector('.book-button').value || '🛒 কিনুন'
+                });
+            });
+            return books;
+        }
+
+        function loadBooksUI(books) {
+            const container = document.getElementById('booksAdminContainer');
+            container.innerHTML = '';
+            
+            if (books && books.length > 0) {
+                books.forEach(book => {
+                    const id = book.id || 'book_' + Date.now();
+                    const html = `
+                        <div class="book-item" data-id="${id}">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-weight:600;font-size:13px;color:var(--tg-theme-text-color);">📚 Book</span>
+                                <button onclick="removeBook('${id}')" style="background:#f44336;color:white;border:none;border-radius:4px;padding:2px 10px;font-size:12px;cursor:pointer;">✕</button>
+                            </div>
+                            <div class="field-group checkbox-group">
+                                <label>Enable</label>
+                                <input type="checkbox" class="book-enabled" data-id="${id}" ${book.enabled !== false ? 'checked' : ''}>
+                            </div>
+                            <div class="field-group">
+                                <label>📖 Book Name</label>
+                                <input class="book-name" data-id="${id}" placeholder="SSC বাংলা সাহিত্য" value="${book.name || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>✍️ Author</label>
+                                <input class="book-author" data-id="${id}" placeholder="লেখকের নাম" value="${book.author || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>🖼️ Cover Image URL</label>
+                                <input class="book-cover" data-id="${id}" placeholder="https://example.com/book.jpg" value="${book.cover || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>💰 Price (৳)</label>
+                                <input class="book-price" data-id="${id}" placeholder="250" type="number" value="${book.price || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>💸 Original Price (৳) - ঐচ্ছিক</label>
+                                <input class="book-original-price" data-id="${id}" placeholder="350" type="number" value="${book.originalPrice || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>⭐ Rating (1-5)</label>
+                                <input class="book-rating" data-id="${id}" placeholder="5" type="number" min="1" max="5" value="${book.rating || '5'}">
+                            </div>
+                            <div class="field-group">
+                                <label>🏷️ Badge (ঐচ্ছিক)</label>
+                                <input class="book-badge-text" data-id="${id}" placeholder="Best Seller / New / Discount" value="${book.badge || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>🔗 Affiliate Link</label>
+                                <input class="book-link" data-id="${id}" placeholder="https://rokomari.com/book/xxxxx?ref=your_id" value="${book.link || ''}">
+                            </div>
+                            <div class="field-group">
+                                <label>🔘 Button Text</label>
+                                <input class="book-button" data-id="${id}" placeholder="🛒 কিনুন" value="${book.buttonText || '🛒 কিনুন'}">
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            }
+        }
+
+        // ====================================================================
         // PROMOTIONS MANAGEMENT
         // ====================================================================
         function addPromotion() {
@@ -2185,6 +2511,10 @@
                 referralTitle: document.getElementById('referralTitle'),
                 referralText: document.getElementById('referralText'),
                 referralBtn: document.getElementById('referralBtn'),
+                booksSection: document.getElementById('booksSection'),
+                booksTitle: document.getElementById('booksTitle'),
+                booksSubtitle: document.getElementById('booksSubtitle'),
+                booksList: document.getElementById('booksList'),
                 sscBtn: document.getElementById('sscBtn'),
                 hscBtn: document.getElementById('hscBtn'),
                 adminLoginOverlay: document.getElementById('adminLoginOverlay'),
@@ -2245,7 +2575,6 @@
                     hideNetworkStateUI();
                     hideRecoveryUI();
                     
-                    // Load Monetag SDK if Zone ID exists
                     if (state.appSettings?.monetagZoneId) {
                         loadMonetagSDK(state.appSettings.monetagZoneId);
                     }
@@ -2356,6 +2685,10 @@
                             referralTitle: '💰 পড়াশোনার পাশাপাশি আয় করুন',
                             referralText: 'ছাত্র-ছাত্রীদের জন্য সহজ ইনকামের সুযোগ! নিজের ব্লগ, ইউটিউব বা অ্যাপ থেকে ঘরে বসেই আয় করতে পারবেন।',
                             referralButton: '🔥 ফ্রি সাইনআপ করুন',
+                            booksEnabled: false,
+                            booksTitle: '📚 প্রস্তুতির সেরা বই',
+                            booksSubtitle: 'SSC/HSC ও ভর্তি পরীক্ষার জন্য',
+                            books: [],
                             promotions: []
                         };
                         window.APP_STATE.appSettings = state.appSettings;
@@ -2383,6 +2716,72 @@
                         DOM.developedBy.innerHTML = `Developed by <a href="${data.developedByLink}" target="_blank">${data.developedBy}</a>`;
                     } else {
                         DOM.developedBy.textContent = `Developed by ${data.developedBy}`;
+                    }
+                }
+                
+                // ===== BOOKS SECTION =====
+                if (DOM.booksSection) {
+                    if (data.booksEnabled) {
+                        var books = data.books || [];
+                        var enabledBooks = books.filter(b => b.enabled !== false && b.name && b.link);
+                        
+                        if (enabledBooks.length > 0) {
+                            DOM.booksSection.style.display = 'block';
+                            if (DOM.booksTitle) DOM.booksTitle.textContent = data.booksTitle || '📚 প্রস্তুতির সেরা বই';
+                            if (DOM.booksSubtitle) DOM.booksSubtitle.textContent = data.booksSubtitle || 'SSC/HSC ও ভর্তি পরীক্ষার জন্য';
+                            
+                            // Render books
+                            DOM.booksList.innerHTML = '';
+                            enabledBooks.forEach(function(book) {
+                                var stars = '⭐'.repeat(parseInt(book.rating) || 5);
+                                var badgeHtml = '';
+                                if (book.badge) {
+                                    var badgeClass = 'discount';
+                                    var badgeLower = book.badge.toLowerCase();
+                                    if (badgeLower.includes('best') || badgeLower.includes('সেলার')) badgeClass = 'bestseller';
+                                    else if (badgeLower.includes('new') || badgeLower.includes('নতুন')) badgeClass = 'new';
+                                    
+                                    badgeHtml = '<div class="book-badge ' + badgeClass + '">' + book.badge + '</div>';
+                                }
+                                
+                                var priceHtml = '';
+                                if (book.price) {
+                                    priceHtml = '<span class="book-price">৳' + book.price + '</span>';
+                                    if (book.originalPrice) {
+                                        priceHtml += ' <span class="book-price-original">৳' + book.originalPrice + '</span>';
+                                    }
+                                }
+                                
+                                var coverHtml;
+                                if (book.cover) {
+                                    coverHtml = '<img class="book-cover" src="' + book.cover + '" alt="' + book.name + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><div class="book-cover" style="display:none;">📖</div>';
+                                } else {
+                                    coverHtml = '<div class="book-cover">📖</div>';
+                                }
+                                
+                                var cardHtml = '<div class="book-card">' +
+                                    badgeHtml +
+                                    coverHtml +
+                                    '<div class="book-info">' +
+                                    '<div>' +
+                                    '<div class="book-name">' + book.name + '</div>' +
+                                    (book.author ? '<div class="book-author">✍️ ' + book.author + '</div>' : '') +
+                                    '<div class="book-rating">' + stars + '</div>' +
+                                    '</div>' +
+                                    '<div>' +
+                                    '<div class="book-price-row">' + priceHtml + '</div>' +
+                                    '<button class="book-buy-btn" onclick="buyBook(\'' + book.link.replace(/'/g, "\\'") + '\')">' + (book.buttonText || '🛒 কিনুন') + '</button>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                                
+                                DOM.booksList.insertAdjacentHTML('beforeend', cardHtml);
+                            });
+                        } else {
+                            DOM.booksSection.style.display = 'none';
+                        }
+                    } else {
+                        DOM.booksSection.style.display = 'none';
                     }
                 }
                 
@@ -2456,6 +2855,10 @@
                 document.getElementById('setReferralTitle').value = data.referralTitle || '💰 পড়াশোনার পাশাপাশি আয় করুন';
                 document.getElementById('setReferralText').value = data.referralText || 'ছাত্র-ছাত্রীদের জন্য সহজ ইনকামের সুযোগ!';
                 document.getElementById('setReferralButton').value = data.referralButton || '🔥 ফ্রি সাইনআপ করুন';
+                document.getElementById('setBooksEnabled').checked = data.booksEnabled || false;
+                document.getElementById('setBooksTitle').value = data.booksTitle || '📚 প্রস্তুতির সেরা বই';
+                document.getElementById('setBooksSubtitle').value = data.booksSubtitle || 'SSC/HSC ও ভর্তি পরীক্ষার জন্য';
+                loadBooksUI(data.books || []);
                 loadPromotionsUI(data.promotions || []);
             }
             
@@ -2486,6 +2889,10 @@
                         referralTitle: document.getElementById('setReferralTitle').value || '💰 পড়াশোনার পাশাপাশি আয় করুন',
                         referralText: document.getElementById('setReferralText').value || '',
                         referralButton: document.getElementById('setReferralButton').value || '🔥 ফ্রি সাইনআপ করুন',
+                        booksEnabled: document.getElementById('setBooksEnabled').checked,
+                        booksTitle: document.getElementById('setBooksTitle').value || '📚 প্রস্তুতির সেরা বই',
+                        booksSubtitle: document.getElementById('setBooksSubtitle').value || 'SSC/HSC ও ভর্তি পরীক্ষার জন্য',
+                        books: getBooksData(),
                         promotions: getPromotionsData(),
                         updatedAt: new Date().toISOString()
                     };
@@ -2497,7 +2904,6 @@
                     window.APP_STATE.appSettings = settings;
                     updateAppUI(settings);
                     
-                    // Load Monetag SDK with new Zone ID
                     if (settings.monetagZoneId) {
                         loadMonetagSDK(settings.monetagZoneId);
                     }
@@ -2676,9 +3082,6 @@
                 });
             }
             
-            // ============================================================
-            // HANDLE EXAM SELECT — WITH AD SHOW
-            // ============================================================
             function handleExamSelect(exam) {
                 if (state.isProcessingClick) return;
                 if (!state.appReady || !state.isOnline) {
@@ -2768,7 +3171,6 @@
                                 showModal();
                             });
                     } else {
-                        // Not a promise — assume success
                         setTimeout(function() {
                             if (!adCompleted) {
                                 adCompleted = true;
