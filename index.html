@@ -374,6 +374,35 @@
         .book-badge.new { background: #4caf50; }
         .book-badge.discount { background: #ff9800; }
 
+        /* ===== BOOKS EMPTY STATE ===== */
+        .books-empty {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: var(--radius);
+            border: 2px dashed rgba(128, 128, 128, 0.2);
+        }
+
+        .books-empty-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        .books-empty-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 6px;
+        }
+
+        .books-empty-text {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+            line-height: 1.5;
+        }
+
         /* ===== REFERRAL SECTION ===== */
         .referral-section {
             display: none;
@@ -1395,7 +1424,7 @@
                     </button>
                 </div>
 
-                <!-- ===== BOOKS SECTION ===== -->
+                <!-- BOOKS SECTION -->
                 <div id="booksSection" class="books-section">
                     <div class="books-header">
                         <h3 id="booksTitle">📚 প্রস্তুতির সেরা বই</h3>
@@ -2719,19 +2748,20 @@
                     }
                 }
                 
-                // ===== BOOKS SECTION =====
+                // ===== BOOKS SECTION (Fixed: Always show if enabled) =====
                 if (DOM.booksSection) {
                     if (data.booksEnabled) {
+                        DOM.booksSection.style.display = 'block';
+                        
+                        if (DOM.booksTitle) DOM.booksTitle.textContent = data.booksTitle || '📚 প্রস্তুতির সেরা বই';
+                        if (DOM.booksSubtitle) DOM.booksSubtitle.textContent = data.booksSubtitle || 'SSC/HSC ও ভর্তি পরীক্ষার জন্য';
+                        
                         var books = data.books || [];
                         var enabledBooks = books.filter(b => b.enabled !== false && b.name && b.link);
                         
+                        DOM.booksList.innerHTML = '';
+                        
                         if (enabledBooks.length > 0) {
-                            DOM.booksSection.style.display = 'block';
-                            if (DOM.booksTitle) DOM.booksTitle.textContent = data.booksTitle || '📚 প্রস্তুতির সেরা বই';
-                            if (DOM.booksSubtitle) DOM.booksSubtitle.textContent = data.booksSubtitle || 'SSC/HSC ও ভর্তি পরীক্ষার জন্য';
-                            
-                            // Render books
-                            DOM.booksList.innerHTML = '';
                             enabledBooks.forEach(function(book) {
                                 var stars = '⭐'.repeat(parseInt(book.rating) || 5);
                                 var badgeHtml = '';
@@ -2778,7 +2808,12 @@
                                 DOM.booksList.insertAdjacentHTML('beforeend', cardHtml);
                             });
                         } else {
-                            DOM.booksSection.style.display = 'none';
+                            // Empty State
+                            DOM.booksList.innerHTML = '<div class="books-empty">' +
+                                '<div class="books-empty-icon">📚</div>' +
+                                '<div class="books-empty-title">শীঘ্রই বই আসছে!</div>' +
+                                '<div class="books-empty-text">SSC/HSC ও ভর্তি পরীক্ষার সেরা বই এখানে পাবেন</div>' +
+                                '</div>';
                         }
                     } else {
                         DOM.booksSection.style.display = 'none';
